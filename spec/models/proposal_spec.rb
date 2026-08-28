@@ -32,6 +32,25 @@ RSpec.describe Proposal, type: :model do
     expect(proposal.errors[:freelancer]).to include("must have a freelancer profile")
   end
 
+  it "converts a normal amount to cents" do
+    proposal = build(:proposal, amount: "1234.56")
+
+    expect(proposal.amount_cents).to eq(123_456)
+    expect(proposal.amount).to eq(BigDecimal("1234.56"))
+  end
+
+  it "requires a positive amount" do
+    expect(build(:proposal, amount: "0")).not_to be_valid
+    expect(build(:proposal, amount: "-1")).not_to be_valid
+  end
+
+  it "requires the job to be open" do
+    proposal = build(:proposal, job: build(:job, status: :draft))
+
+    expect(proposal).not_to be_valid
+    expect(proposal.errors[:job]).to include("must be open")
+  end
+
   it "does not allow a freelancer to propose to their own job" do
     job = create(:job)
     create(:freelancer_profile, user: job.client)

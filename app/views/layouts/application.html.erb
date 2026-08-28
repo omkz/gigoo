@@ -24,6 +24,22 @@
   </head>
 
   <body class="bg-slate-50 text-slate-900">
+    <header class="border-b border-slate-200 bg-white">
+      <div class="container mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
+        <%= link_to "Gigoo", jobs_path, class: "text-xl font-bold tracking-tight text-slate-900" %>
+        <nav class="flex items-center gap-4 text-sm font-semibold">
+          <%= link_to "Browse jobs", jobs_path, class: "text-slate-600 hover:text-indigo-600" %>
+          <% if authenticated? %>
+            <% if Current.user.client_profile.present? %>
+              <%= link_to "My jobs", client_jobs_path, class: "text-slate-600 hover:text-indigo-600" %>
+            <% end %>
+            <%= button_to "Sign out", session_path, method: :delete, class: "text-slate-600 hover:text-indigo-600" %>
+          <% else %>
+            <%= link_to "Sign in", new_session_path, class: "text-slate-600 hover:text-indigo-600" %>
+          <% end %>
+        </nav>
+      </div>
+    </header>
     <main class="container mx-auto max-w-6xl px-5 py-12">
       <% flash.each do |type, message| %>
         <div class="mb-6 rounded-lg border px-4 py-3 <%= type.to_s == "alert" ? "border-red-200 bg-red-50 text-red-800" : "border-emerald-200 bg-emerald-50 text-emerald-800" %>">

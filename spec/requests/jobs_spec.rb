@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "Jobs", type: :request do
+RSpec.describe "Public jobs", type: :request do
   def sign_in(user)
     session = Session.create!(user: user, user_agent: "RSpec", ip_address: "127.0.0.1")
     get new_session_path
@@ -9,123 +9,78 @@ RSpec.describe "Jobs", type: :request do
     cookies[:session_id] = cookie_jar[:session_id]
   end
 
-  def client_user
-    create(:client_profile).user
-  end
-
-  let(:valid_job_params) do
-    {
-      title: "Build a reporting dashboard",
-      description: "Create a useful dashboard for our operations team.",
-      budget: "1250.50",
-      skills: "Ruby, Rails, PostgreSQL"
-    }
-  end
-
-  it "shows a client-profile user only their posted jobs" do
-    user = client_user
-    own_job = create(:job, client: user, title: "My private listing")
-    other_job = create(:job, title: "Another client's listing")
-    sign_in(user)
+  it "allows an unauthenticated visitor to browse only open jobs" do
+    open_job = create(:job, status: :open, title: "Visible open job")
+    draft_job = create(:job, status: :draft, title: "Hidden draft job")
+    closed_job = create(:job, status: :closed, title: "Hidden closed job")
 
     get jobs_path
 
     expect(response).to have_http_status(:ok)
-    expect(response.body).to include(own_job.title)
-    expect(response.body).not_to include(other_job.title)
+    expect(response.body).to include(open_job.title)
+    expect(response.body).not_to include(draft_job.title)
+    expect(response.body).not_to include(closed_job.title)
   end
 
-  it "allows a client-profile user to create a draft job" do
-    user = client_user
-    sign_in(user)
+  it "shows newest open jobs first" do
+    older_job = create(:job, status: :open, title: "Older job", created_at: 2.days.ago)
+    newer_job = create(:job, status: :open, title: "Newer job", created_at: 1.hour.ago)
 
-    expect do
-      post jobs_path, params: { job: valid_job_params }
-    end.to change(user.posted_jobs, :count).by(1)
+    get jobs_path
 
-    job = user.posted_jobs.order(:created_at).last
-    expect(job).to be_draft
-    expect(job.budget_cents).to eq(125_050)
-    expect(job.skills).to eq([ "Ruby", "Rails", "PostgreSQL" ])
-    expect(response).to redirect_to(jobs_path)
+    expect(response.body.index(newer_job.title)).to be < response.body.index(older_job.title)
   end
 
-  it "always derives the client from the authenticated user" do
-    user = client_user
-    another_client = client_user
-    sign_in(user)
+  it "allows an unauthenticated visitor to view an open job" do
+    job = create(:job, status: :open)
 
-    post jobs_path, params: { job: valid_job_params.merge(client_id: another_client.id) }
+    get job_path(job)
 
-    expect(Job.order(:created_at).last.client).to eq(user)
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include(job.title, job.description, "Sign in to submit")
   end
 
-  it "does not allow a user without a client profile to create a job" do
+  it "does not expose a draft job detail" do
+    job = create(:job, status: :draft)
+
+    get job_path(job)
+
+    expect(response).to have_http_status(:not_found)
+  end
+
+  it "does not expose a closed job detail" do
+    job = create(:job, status: :closed)
+
+    get job_path(job)
+
+    expect(response).to have_http_status(:not_found)
+  end
+
+  it "prompts an authenticated user without a freelancer profile to create one" do
     sign_in(create(:user))
 
-    expect do
-      post jobs_path, params: { job: valid_job_params }
-    end.not_to change(Job, :count)
+    get job_path(create(:job, status: :open))
 
-    expect(response).to have_http_status(:forbidden)
+    expect(response.body).to include("Create a freelancer profile to submit a proposal.")
+    expect(response.body).not_to include("proposal[amount]")
   end
 
-  it "does not allow a user to edit another client's job" do
-    owner = client_user
-    other_client = client_user
-    job = create(:job, client: owner)
-    sign_in(other_client)
+  it "shows the proposal form to an eligible freelancer" do
+    sign_in(create(:freelancer_profile).user)
 
-    get edit_job_path(job)
+    get job_path(create(:job, status: :open))
 
-    expect(response).to have_http_status(:forbidden)
+    expect(response.body).to include("Submit proposal")
+    expect(response.body).to include("proposal[amount]", "proposal[message]")
   end
 
-  it "allows the owner to edit their job" do
-    owner = client_user
-    job = create(:job, client: owner)
-    sign_in(owner)
+  it "shows the existing proposal status instead of another form" do
+    proposal = create(:proposal, status: :pending)
+    sign_in(proposal.freelancer)
 
-    patch job_path(job), params: {
-      job: valid_job_params.merge(title: "Updated dashboard", skills: "Rails, Hotwire")
-    }
+    get job_path(proposal.job)
 
-    expect(response).to redirect_to(jobs_path)
-    expect(job.reload.title).to eq("Updated dashboard")
-    expect(job.skills).to eq([ "Rails", "Hotwire" ])
-  end
-
-  it "allows the owner to publish a draft job" do
-    owner = client_user
-    job = create(:job, client: owner, status: :draft)
-    sign_in(owner)
-
-    patch publish_job_path(job)
-
-    expect(response).to redirect_to(jobs_path)
-    expect(job.reload).to be_open
-  end
-
-  it "allows the owner to close an open job" do
-    owner = client_user
-    job = create(:job, client: owner, status: :open)
-    sign_in(owner)
-
-    patch close_job_path(job)
-
-    expect(response).to redirect_to(jobs_path)
-    expect(job.reload).to be_closed
-  end
-
-  it "renders validation errors for invalid input" do
-    user = client_user
-    sign_in(user)
-
-    expect do
-      post jobs_path, params: { job: valid_job_params.merge(title: "", budget: "-1") }
-    end.not_to change(Job, :count)
-
-    expect(response).to have_http_status(:unprocessable_content)
-    expect(response.body).to include("prevented this job from being saved")
+    expect(response.body).to include("Proposal submitted · Pending")
+    expect(response.body).not_to include("proposal[amount]")
   end
 end

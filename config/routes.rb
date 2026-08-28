@@ -1,11 +1,18 @@
 Rails.application.routes.draw do
+  root "jobs#index"
+
   resource :session
   resources :passwords, param: :token
-  resources :jobs, except: %i[ show destroy ] do
-    member do
-      patch :publish
-      patch :close
+  namespace :client do
+    resources :jobs, except: %i[ show destroy ] do
+      member do
+        patch :publish
+        patch :close
+      end
     end
+  end
+  resources :jobs, only: %i[ index show ] do
+    resources :proposals, only: :create
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

@@ -1,4 +1,4 @@
-<%= form_with model: job, class: "space-y-6" do |form| %>
+<%= form_with model: [ :client, job ], class: "space-y-6" do |form| %>
   <% if job.errors.any? %>
     <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
       <h2 class="font-semibold"><%= pluralize(job.errors.count, "error") %> prevented this job from being saved:</h2>
@@ -34,6 +34,6 @@
 
   <div class="flex items-center gap-3">
     <%= form.submit class: "rounded-lg bg-indigo-600 px-5 py-3 font-semibold text-white shadow-sm hover:bg-indigo-500" %>
-    <%= link_to "Cancel", jobs_path, class: "rounded-lg px-4 py-3 font-semibold text-slate-600 hover:bg-slate-100" %>
+    <%= link_to "Cancel", client_jobs_path, class: "rounded-lg px-4 py-3 font-semibold text-slate-600 hover:bg-slate-100" %>
   </div>
 <% end %>
