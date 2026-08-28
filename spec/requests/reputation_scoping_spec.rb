@@ -30,11 +30,13 @@ RSpec.describe "Role-scoped reputation", type: :request do
     get freelancer_path(freelancer_profile)
 
     expect(response.body).to include("5.0 · 1 review", freelancer_review.body)
+    expect(response.body).to include("1 completed contract", "0 repeat clients", "0 low ratings")
     expect(response.body).not_to include(client_review.body, "3.5 · 2 reviews")
 
     get client_path(client_profile)
 
     expect(response.body).to include("2.0 · 1 review", client_review.body)
+    expect(response.body).to include("1 completed contract", "0 repeat freelancers", "1 low rating")
     expect(response.body).not_to include(freelancer_review.body, "3.5 · 2 reviews")
   end
 end

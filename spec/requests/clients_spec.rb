@@ -17,7 +17,17 @@ RSpec.describe "Clients", type: :request do
     expect(response).to have_http_status(:ok)
     expect(response.body).to include("Acme Labs", "Jane Smith", profile.location, "Payment verified")
     expect(response.body).to include("4.5 · 2 reviews", first_review.body, second_review.body)
+    expect(response.body).to include("Trust evidence", "2 completed contracts", "0 repeat freelancers", "0 low ratings")
     expect(response.body).to include(first_review.reviewer.name)
     expect(response.body).not_to include(unrelated.body, user.email_address, first_review.reviewer.email_address)
+  end
+
+  it "shows factual no-history states" do
+    profile = create(:client_profile, payment_verified: false)
+
+    get client_path(profile)
+
+    expect(response.body).to include("Trust evidence", "Payment not yet verified", "No reviews yet", "No completed contracts yet")
+    expect(response.body).not_to include("0.0 ·", "Untrusted", "Low trust")
   end
 end

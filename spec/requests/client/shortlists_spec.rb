@@ -153,6 +153,41 @@ RSpec.describe "Client shortlists", type: :request do
     expect(response.body.index(newer_title)).to be < response.body.index(older_title)
   end
 
+  it "shows role-scoped trust evidence for each shortlisted freelancer" do
+    job = create(:job)
+    strong_profile = create(:freelancer_profile, title: "Strong candidate")
+    create(:client_profile, user: strong_profile.user)
+    mixed_profile = create(:freelancer_profile, title: "Mixed candidate")
+    repeat_client = create(:client_profile).user
+
+    first_contract = create(:contract, :completed, job: create(:job, client: repeat_client), client: repeat_client, freelancer: strong_profile.user)
+    second_contract = create(:contract, :completed, job: create(:job, client: repeat_client), client: repeat_client, freelancer: strong_profile.user)
+    create(:review, contract: first_contract, reviewer: repeat_client, reviewee: strong_profile.user, rating: 5)
+    create(:review, contract: second_contract, reviewer: repeat_client, reviewee: strong_profile.user, rating: 5)
+
+    strong_client_job = create(:job, client: strong_profile.user)
+    strong_client_contract = create(:contract, :completed, job: strong_client_job, client: strong_profile.user)
+    create(:review, contract: strong_client_contract, reviewer: strong_client_contract.freelancer, reviewee: strong_profile.user, rating: 2)
+
+    mixed_client = create(:client_profile).user
+    mixed_contract = create(:contract, :completed, job: create(:job, client: mixed_client), client: mixed_client, freelancer: mixed_profile.user)
+    create(:review, contract: mixed_contract, reviewer: mixed_client, reviewee: mixed_profile.user, rating: 3)
+
+    create(:shortlist, job: job, client: job.client, freelancer: strong_profile.user)
+    create(:shortlist, job: job, client: job.client, freelancer: mixed_profile.user)
+    sign_in(job.client)
+
+    get client_job_shortlists_path(job)
+
+    document = Nokogiri::HTML(response.body)
+    strong_card = document.css("article").find { |article| article.text.include?(strong_profile.user.name) }.text
+    mixed_card = document.css("article").find { |article| article.text.include?(mixed_profile.user.name) }.text
+
+    expect(strong_card).to include("5.0 · 2 reviews", "2 completed contracts", "1 repeat client", "0 low ratings")
+    expect(strong_card).not_to include("2.0 · 1 review", "1 low rating")
+    expect(mixed_card).to include("3.0 · 1 review", "1 completed contract", "0 repeat clients", "1 low rating")
+  end
+
   it "does not allow another client to view a job's shortlist" do
     job = create(:job)
     sign_in(create(:client_profile).user)

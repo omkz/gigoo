@@ -12,4 +12,32 @@ RSpec.describe FreelancerProfile, type: :model do
 
     expect(build(:freelancer_profile, user: profile.user)).not_to be_valid
   end
+
+  it "exposes only role-scoped completed work and review evidence" do
+    profile = create(:freelancer_profile)
+    create(:client_profile, user: profile.user)
+    repeat_client = create(:client_profile).user
+    other_client = create(:client_profile).user
+
+    first_repeat = create(:contract, :completed, job: create(:job, client: repeat_client), client: repeat_client, freelancer: profile.user)
+    second_repeat = create(:contract, :completed, job: create(:job, client: repeat_client), client: repeat_client, freelancer: profile.user)
+    other_completed = create(:contract, :completed, job: create(:job, client: other_client), client: other_client, freelancer: profile.user)
+    create(:contract, job: create(:job, client: other_client), client: other_client, freelancer: profile.user, status: :active)
+    create(:contract, job: create(:job, client: other_client), client: other_client, freelancer: profile.user, status: :cancelled)
+
+    create(:review, contract: first_repeat, reviewer: repeat_client, reviewee: profile.user, rating: 5)
+    create(:review, contract: second_repeat, reviewer: repeat_client, reviewee: profile.user, rating: 5)
+    create(:review, contract: other_completed, reviewer: other_client, reviewee: profile.user, rating: 3)
+
+    client_job = create(:job, client: profile.user)
+    client_contract = create(:contract, :completed, job: client_job, client: profile.user)
+    create(:review, contract: client_contract, reviewer: client_contract.freelancer, reviewee: profile.user, rating: 2)
+
+    expect(profile.completed_contracts.count).to eq(3)
+    expect(profile.repeat_client_count).to eq(1)
+    expect(profile.review_count).to eq(3)
+    expect(profile.average_rating).to eq(BigDecimal("4.3333333333333333"))
+    expect(profile.low_rating_reviews.count).to eq(1)
+    expect(profile.received_reviews).not_to include(client_contract.reviews.first)
+  end
 end

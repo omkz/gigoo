@@ -79,7 +79,17 @@ RSpec.describe "Freelancers", type: :request do
     get freelancer_path(profile)
 
     expect(response.body).to include("4.0 · 2 reviews", first_review.body, second_review.body)
+    expect(response.body).to include("Trust evidence", "2 completed contracts", "0 repeat clients", "1 low rating")
     expect(response.body).to include(first_review.reviewer.name)
     expect(response.body).not_to include(unrelated.body, user.email_address, first_review.reviewer.email_address)
+  end
+
+  it "shows factual no-history states" do
+    profile = create(:freelancer_profile)
+
+    get freelancer_path(profile)
+
+    expect(response.body).to include("Trust evidence", "No reviews yet", "No completed contracts yet")
+    expect(response.body).not_to include("0.0 ·", "Untrusted", "Low trust")
   end
 end

@@ -36,12 +36,33 @@
     <% end %>
 
     <section class="mt-8 border-t border-slate-200 pt-8">
-      <h2 class="text-2xl font-bold">Marketplace reputation</h2>
+      <h2 class="text-2xl font-bold">Trust evidence</h2>
+      <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="rounded-lg bg-slate-50 p-4">
+          <% if @review_count.positive? %>
+            <p class="text-lg font-semibold"><%= number_with_precision(@average_rating, precision: 1) %> · <%= pluralize(@review_count, "review") %></p>
+          <% else %>
+            <p class="font-semibold text-slate-600">No reviews yet</p>
+          <% end %>
+        </div>
+        <div class="rounded-lg bg-slate-50 p-4">
+          <% if @completed_contract_count.positive? %>
+            <p class="text-lg font-semibold"><%= pluralize(@completed_contract_count, "completed contract") %></p>
+          <% else %>
+            <p class="font-semibold text-slate-600">No completed contracts yet</p>
+          <% end %>
+        </div>
+        <div class="rounded-lg bg-slate-50 p-4">
+          <p class="text-lg font-semibold"><%= pluralize(@repeat_client_count, "repeat client") %></p>
+        </div>
+        <div class="rounded-lg bg-slate-50 p-4">
+          <p class="text-lg font-semibold"><%= pluralize(@low_rating_count, "low rating") %></p>
+        </div>
+      </div>
+
       <% if @review_count.positive? %>
-        <p class="mt-2 text-lg font-semibold"><%= number_with_precision(@average_rating, precision: 1) %> · <%= pluralize(@review_count, "review") %></p>
+        <h3 class="mt-8 text-xl font-semibold">Recent reviews</h3>
         <%= render "reviews/public_reviews", reviews: @reviews %>
-      <% else %>
-        <p class="mt-3 text-slate-600">No reviews yet.</p>
       <% end %>
     </section>
   </article>

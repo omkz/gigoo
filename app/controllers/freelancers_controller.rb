@@ -10,10 +10,12 @@ class FreelancersController < ApplicationController
 
   def show
     @freelancer = FreelancerProfile.includes(:user).find(params[:id])
-    received_reviews = Review.for_freelancer_role(@freelancer.user)
-    @review_count = received_reviews.count
-    @average_rating = received_reviews.average(:rating)
-    @reviews = received_reviews.includes(reviewer: %i[ client_profile freelancer_profile ]).order(created_at: :desc).limit(5)
+    @review_count = @freelancer.review_count
+    @average_rating = @freelancer.average_rating
+    @completed_contract_count = @freelancer.completed_contracts.count
+    @repeat_client_count = @freelancer.repeat_client_count
+    @low_rating_count = @freelancer.low_rating_reviews.count
+    @reviews = @freelancer.received_reviews.includes(reviewer: %i[ client_profile freelancer_profile ]).order(created_at: :desc).limit(5)
 
     if Current.user == @freelancer.user
       @latest_contract = Current.user.freelancer_contracts.includes(:job).order(created_at: :desc).first
