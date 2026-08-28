@@ -12,6 +12,16 @@ class Job < ApplicationRecord
     numericality: { greater_than_or_equal_to: 0, only_integer: true }
   validate :client_has_client_profile
 
+  def budget
+    BigDecimal(budget_cents.to_s) / 100 if budget_cents.present?
+  end
+
+  def budget=(value)
+    self.budget_cents = value.present? ? (BigDecimal(value.to_s) * 100).round.to_i : nil
+  rescue ArgumentError
+    self.budget_cents = nil
+  end
+
   private
 
   def client_has_client_profile

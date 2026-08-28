@@ -1,0 +1,54 @@
+<% content_for :title, "My Jobs · Gigoo" %>
+
+<section class="w-full">
+  <div class="mb-8 flex items-center justify-between gap-4">
+    <div>
+      <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">Client workspace</p>
+      <h1 class="mt-1 text-3xl font-bold tracking-tight">My posted jobs</h1>
+    </div>
+    <%= link_to "Post a Job", new_job_path, class: "rounded-lg bg-indigo-600 px-5 py-3 font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+  </div>
+
+  <% if @jobs.any? %>
+    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div class="divide-y divide-slate-200">
+        <% @jobs.each do |job| %>
+          <article class="p-6">
+            <div class="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
+              <div>
+                <div class="flex flex-wrap items-center gap-3">
+                  <h2 class="text-xl font-semibold"><%= job.title %></h2>
+                  <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-700"><%= job.status %></span>
+                </div>
+                <p class="mt-3 font-medium text-slate-700"><%= number_to_currency(job.budget) %></p>
+                <p class="mt-2 text-sm text-slate-500">Created <%= l(job.created_at.to_date, format: :long) %></p>
+
+                <% if job.skills.any? %>
+                  <div class="mt-4 flex flex-wrap gap-2">
+                    <% job.skills.each do |skill| %>
+                      <span class="rounded-md bg-indigo-50 px-2.5 py-1 text-sm text-indigo-700"><%= skill %></span>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+
+              <div class="flex flex-wrap gap-2">
+                <%= link_to "Edit", edit_job_path(job), class: "rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold hover:bg-slate-50" %>
+                <% if job.draft? %>
+                  <%= button_to "Publish", publish_job_path(job), method: :patch, class: "rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500" %>
+                <% elsif job.open? %>
+                  <%= button_to "Close", close_job_path(job), method: :patch, class: "rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700" %>
+                <% end %>
+              </div>
+            </div>
+          </article>
+        <% end %>
+      </div>
+    </div>
+  <% else %>
+    <div class="rounded-xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
+      <h2 class="text-xl font-semibold">No jobs yet</h2>
+      <p class="mt-2 text-slate-600">Post your first job and keep it as a draft until it is ready.</p>
+    </div>
+  <% end %>
+</section>

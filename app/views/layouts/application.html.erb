@@ -23,8 +23,13 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex">
+  <body class="bg-slate-50 text-slate-900">
+    <main class="container mx-auto max-w-6xl px-5 py-12">
+      <% flash.each do |type, message| %>
+        <div class="mb-6 rounded-lg border px-4 py-3 <%= type.to_s == "alert" ? "border-red-200 bg-red-50 text-red-800" : "border-emerald-200 bg-emerald-50 text-emerald-800" %>">
+          <%= message %>
+        </div>
+      <% end %>
       <%= yield %>
     </main>
   </body>

@@ -1,0 +1,10 @@
+<% content_for :title, "Edit Job · Gigoo" %>
+
+<section class="mx-auto w-full max-w-3xl">
+  <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">Client workspace</p>
+  <h1 class="mt-1 text-3xl font-bold tracking-tight">Edit job</h1>
+
+  <div class="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+    <%= render "form", job: @job %>
+  </div>
+</section>
