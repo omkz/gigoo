@@ -10,7 +10,7 @@ class FreelancersController < ApplicationController
 
   def show
     @freelancer = FreelancerProfile.includes(:user).find(params[:id])
-    received_reviews = @freelancer.user.reviews_received
+    received_reviews = Review.for_freelancer_role(@freelancer.user)
     @review_count = received_reviews.count
     @average_rating = received_reviews.average(:rating)
     @reviews = received_reviews.includes(reviewer: %i[ client_profile freelancer_profile ]).order(created_at: :desc).limit(5)

@@ -3,7 +3,7 @@ class ClientsController < ApplicationController
 
   def show
     @client = ClientProfile.includes(:user).find(params[:id])
-    received_reviews = @client.user.reviews_received
+    received_reviews = Review.for_client_role(@client.user)
     @review_count = received_reviews.count
     @average_rating = received_reviews.average(:rating)
     @reviews = received_reviews.includes(reviewer: %i[ client_profile freelancer_profile ]).order(created_at: :desc).limit(5)

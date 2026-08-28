@@ -3,6 +3,13 @@ class Review < ApplicationRecord
   belongs_to :reviewer, class_name: "User"
   belongs_to :reviewee, class_name: "User"
 
+  scope :for_freelancer_role, ->(user) {
+    joins(:contract).where(reviewee: user, contracts: { freelancer_id: user.id })
+  }
+  scope :for_client_role, ->(user) {
+    joins(:contract).where(reviewee: user, contracts: { client_id: user.id })
+  }
+
   validates :rating, numericality: { only_integer: true, in: 1..5 }
   validates :reviewer_id, uniqueness: { scope: :contract_id }
   validate :reviewer_is_not_reviewee
