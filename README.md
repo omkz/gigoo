@@ -72,15 +72,21 @@ bin/rspec
 
 ## Agent-native direction
 
-Gigoo is being designed so AI agents can eventually interact with marketplace workflows through structured WebMCP tools. Planned capabilities include:
+Gigoo exposes its first read-only WebMCP tools through the browser's experimental `document.modelContext` API:
 
-- Search jobs and freelancers.
-- Inspect client and freelancer reputation.
+- `search_jobs`
+- `get_job`
+- `search_freelancers`
+- `get_freelancer`
+- `get_client`
+
+These tools provide structured public marketplace data and grounded trust evidence. Browsers without WebMCP support continue to use Gigoo normally. Planned agent capabilities build on this read-only foundation:
+
 - Compare candidates using grounded marketplace evidence.
 - Create shortlists.
 - Prepare or submit proposals with user authorization.
 
-These WebMCP capabilities are planned or in development; the repository does not currently expose WebMCP tools.
+Mutation tools for shortlisting, proposals, and hiring remain planned and are not exposed yet.
 
 ## Development
 

@@ -6,6 +6,35 @@ class FreelancerProfile < ApplicationRecord
     numericality: { greater_than_or_equal_to: 0, only_integer: true },
     allow_nil: true
 
+  def self.trust_evidence_for(user_ids)
+    user_ids = user_ids.compact.uniq
+    completed_contracts = Contract.completed.where(freelancer_id: user_ids)
+    role_reviews = Review
+      .joins(:contract)
+      .where(contracts: { freelancer_id: user_ids })
+      .where("reviews.reviewee_id = contracts.freelancer_id")
+
+    completed_counts = completed_contracts.group(:freelancer_id).count
+    review_counts = role_reviews.group(:reviewee_id).count
+    average_ratings = role_reviews.group(:reviewee_id).average(:rating)
+    low_rating_counts = role_reviews.where(rating: ..3).group(:reviewee_id).count
+    repeat_pairs = completed_contracts
+      .group(:freelancer_id, :client_id)
+      .having("COUNT(*) >= 2")
+      .count
+    repeat_counts = repeat_pairs.keys.group_by(&:first).transform_values(&:count)
+
+    user_ids.index_with do |user_id|
+      {
+        average_rating: average_ratings[user_id],
+        review_count: review_counts.fetch(user_id, 0),
+        completed_contract_count: completed_counts.fetch(user_id, 0),
+        repeat_client_count: repeat_counts.fetch(user_id, 0),
+        low_rating_count: low_rating_counts.fetch(user_id, 0)
+      }
+    end
+  end
+
   def received_reviews
     Review.for_freelancer_role(user)
   end

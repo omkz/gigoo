@@ -32,6 +32,11 @@ Rails.application.routes.draw do
   end
   resources :clients, only: :show
   resources :freelancers, only: %i[ index show ]
+  namespace :webmcp do
+    resources :jobs, only: %i[ index show ]
+    resources :freelancers, only: %i[ index show ]
+    resources :clients, only: :show
+  end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
