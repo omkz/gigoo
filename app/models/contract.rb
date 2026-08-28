@@ -12,6 +12,7 @@ class Contract < ApplicationRecord
     numericality: { greater_than_or_equal_to: 0, only_integer: true }
   validate :client_owns_job
   validate :freelancer_has_freelancer_profile
+  validate :client_is_not_freelancer
 
   private
 
@@ -21,5 +22,9 @@ class Contract < ApplicationRecord
 
   def freelancer_has_freelancer_profile
     errors.add(:freelancer, "must have a freelancer profile") if freelancer.present? && freelancer.freelancer_profile.blank?
+  end
+
+  def client_is_not_freelancer
+    errors.add(:freelancer, "must be different from client") if client.present? && client == freelancer
   end
 end

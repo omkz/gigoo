@@ -39,4 +39,13 @@ RSpec.describe Shortlist, type: :model do
     expect(shortlist).not_to be_valid
     expect(shortlist.errors[:freelancer]).to include("must have a freelancer profile")
   end
+
+  it "does not allow a client to shortlist themselves" do
+    job = create(:job)
+    create(:freelancer_profile, user: job.client)
+    shortlist = build(:shortlist, job: job, client: job.client, freelancer: job.client)
+
+    expect(shortlist).not_to be_valid
+    expect(shortlist.errors[:freelancer]).to include("cannot be the client")
+  end
 end

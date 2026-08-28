@@ -6,6 +6,7 @@ class Shortlist < ApplicationRecord
   validates :freelancer_id, uniqueness: { scope: [ :job_id, :client_id ] }
   validate :client_owns_job
   validate :freelancer_has_freelancer_profile
+  validate :client_is_not_freelancer
 
   private
 
@@ -15,5 +16,9 @@ class Shortlist < ApplicationRecord
 
   def freelancer_has_freelancer_profile
     errors.add(:freelancer, "must have a freelancer profile") if freelancer.present? && freelancer.freelancer_profile.blank?
+  end
+
+  def client_is_not_freelancer
+    errors.add(:freelancer, "cannot be the client") if client.present? && client == freelancer
   end
 end

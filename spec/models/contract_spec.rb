@@ -29,4 +29,13 @@ RSpec.describe Contract, type: :model do
     expect(contract).not_to be_valid
     expect(contract.errors[:freelancer]).to include("must have a freelancer profile")
   end
+
+  it "does not allow the same user to be client and freelancer" do
+    job = create(:job)
+    create(:freelancer_profile, user: job.client)
+    contract = build(:contract, job: job, client: job.client, freelancer: job.client)
+
+    expect(contract).not_to be_valid
+    expect(contract.errors[:freelancer]).to include("must be different from client")
+  end
 end

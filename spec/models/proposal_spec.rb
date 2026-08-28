@@ -31,4 +31,13 @@ RSpec.describe Proposal, type: :model do
     expect(proposal).not_to be_valid
     expect(proposal.errors[:freelancer]).to include("must have a freelancer profile")
   end
+
+  it "does not allow a freelancer to propose to their own job" do
+    job = create(:job)
+    create(:freelancer_profile, user: job.client)
+    proposal = build(:proposal, job: job, freelancer: job.client)
+
+    expect(proposal).not_to be_valid
+    expect(proposal.errors[:freelancer]).to include("cannot propose to their own job")
+  end
 end
