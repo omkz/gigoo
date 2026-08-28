@@ -24,4 +24,11 @@ RSpec.describe Proposal, type: :model do
 
     expect { duplicate.save!(validate: false) }.to raise_error(ActiveRecord::RecordNotUnique)
   end
+
+  it "requires the freelancer to have a freelancer profile" do
+    proposal = build(:proposal, freelancer: build(:user))
+
+    expect(proposal).not_to be_valid
+    expect(proposal.errors[:freelancer]).to include("must have a freelancer profile")
+  end
 end

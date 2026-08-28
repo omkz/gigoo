@@ -25,4 +25,18 @@ RSpec.describe Shortlist, type: :model do
 
     expect { duplicate.save!(validate: false) }.to raise_error(ActiveRecord::RecordNotUnique)
   end
+
+  it "requires the client to own the job" do
+    shortlist = build(:shortlist, client: build(:user))
+
+    expect(shortlist).not_to be_valid
+    expect(shortlist.errors[:client]).to include("must own the job")
+  end
+
+  it "requires the freelancer to have a freelancer profile" do
+    shortlist = build(:shortlist, freelancer: build(:user))
+
+    expect(shortlist).not_to be_valid
+    expect(shortlist.errors[:freelancer]).to include("must have a freelancer profile")
+  end
 end

@@ -9,4 +9,11 @@ class Proposal < ApplicationRecord
     numericality: { greater_than_or_equal_to: 0, only_integer: true }
   validates :message, presence: true
   validates :freelancer_id, uniqueness: { scope: :job_id }
+  validate :freelancer_has_freelancer_profile
+
+  private
+
+  def freelancer_has_freelancer_profile
+    errors.add(:freelancer, "must have a freelancer profile") if freelancer.present? && freelancer.freelancer_profile.blank?
+  end
 end

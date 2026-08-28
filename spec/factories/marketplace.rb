@@ -1,13 +1,13 @@
 FactoryBot.define do
   factory :client_profile do
-    association :user, factory: :user, role: :client
+    user
     company_name { "Acme Inc." }
     bio { "A growing company." }
     location { "Jakarta" }
   end
 
   factory :freelancer_profile do
-    association :user, factory: :user, role: :freelancer
+    user
     title { "Rails Developer" }
     bio { "I build reliable web applications." }
     hourly_rate_cents { 25_000 }
@@ -16,7 +16,11 @@ FactoryBot.define do
   end
 
   factory :job do
-    association :client, factory: :user, role: :client
+    transient do
+      client_profile { association(:client_profile) }
+    end
+
+    client { client_profile.user }
     title { "Build a marketplace feature" }
     description { "Implement and test a marketplace feature." }
     budget_cents { 500_000 }
@@ -26,7 +30,11 @@ FactoryBot.define do
 
   factory :proposal do
     job
-    association :freelancer, factory: :user, role: :freelancer
+    transient do
+      freelancer_profile { association(:freelancer_profile) }
+    end
+
+    freelancer { freelancer_profile.user }
     amount_cents { 450_000 }
     message { "I can deliver this project." }
     status { :pending }
@@ -35,7 +43,11 @@ FactoryBot.define do
   factory :contract do
     job
     client { job.client }
-    association :freelancer, factory: :user, role: :freelancer
+    transient do
+      freelancer_profile { association(:freelancer_profile) }
+    end
+
+    freelancer { freelancer_profile.user }
     amount_cents { 450_000 }
     status { :active }
     started_at { Time.current }
@@ -57,6 +69,10 @@ FactoryBot.define do
   factory :shortlist do
     job
     client { job.client }
-    association :freelancer, factory: :user, role: :freelancer
+    transient do
+      freelancer_profile { association(:freelancer_profile) }
+    end
+
+    freelancer { freelancer_profile.user }
   end
 end

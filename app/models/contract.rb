@@ -10,4 +10,16 @@ class Contract < ApplicationRecord
   validates :amount_cents,
     presence: true,
     numericality: { greater_than_or_equal_to: 0, only_integer: true }
+  validate :client_owns_job
+  validate :freelancer_has_freelancer_profile
+
+  private
+
+  def client_owns_job
+    errors.add(:client, "must own the job") if job.present? && client.present? && client != job.client
+  end
+
+  def freelancer_has_freelancer_profile
+    errors.add(:freelancer, "must have a freelancer profile") if freelancer.present? && freelancer.freelancer_profile.blank?
+  end
 end

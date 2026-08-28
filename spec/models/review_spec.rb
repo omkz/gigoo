@@ -11,12 +11,62 @@ RSpec.describe Review, type: :model do
     expect(build(:review, rating: 6)).not_to be_valid
   end
 
-  it "does not allow a reviewer to review themselves" do
+  it "allows the client to review the freelancer" do
     review = build(:review)
-    review.reviewee = review.reviewer
+
+    expect(review).to be_valid
+  end
+
+  it "allows the freelancer to review the client" do
+    contract = build(:contract, :completed)
+    review = build(:review, contract: contract, reviewer: contract.freelancer, reviewee: contract.client)
+
+    expect(review).to be_valid
+  end
+
+  it "does not allow the client to review themselves" do
+    contract = build(:contract, :completed)
+    review = build(:review, contract: contract, reviewer: contract.client, reviewee: contract.client)
 
     expect(review).not_to be_valid
     expect(review.errors[:reviewer]).to include("cannot review themselves")
+  end
+
+  it "does not allow the freelancer to review themselves" do
+    contract = build(:contract, :completed)
+    review = build(:review, contract: contract, reviewer: contract.freelancer, reviewee: contract.freelancer)
+
+    expect(review).not_to be_valid
+    expect(review.errors[:reviewer]).to include("cannot review themselves")
+  end
+
+  it "does not allow an unrelated user to review either contract party" do
+    contract = build(:contract, :completed)
+    unrelated_user = build(:user)
+    reviews = [ contract.client, contract.freelancer ].map do |reviewee|
+      build(:review, contract: contract, reviewer: unrelated_user, reviewee: reviewee)
+    end
+
+    reviews.each do |review|
+      expect(review).not_to be_valid
+      expect(review.errors[:reviewer]).to include("must be a party to the contract")
+    end
+  end
+
+  it "does not allow the client to review a third user" do
+    contract = build(:contract, :completed)
+    review = build(:review, contract: contract, reviewer: contract.client, reviewee: build(:user))
+
+    expect(review).not_to be_valid
+    expect(review.errors[:reviewee]).to include("must be the other party to the contract")
+  end
+
+  it "does not allow the freelancer to review a third user" do
+    contract = build(:contract, :completed)
+    review = build(:review, contract: contract, reviewer: contract.freelancer, reviewee: build(:user))
+
+    expect(review).not_to be_valid
+    expect(review.errors[:reviewee]).to include("must be the other party to the contract")
   end
 
   it "requires the contract to be completed" do

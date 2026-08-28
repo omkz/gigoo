@@ -15,4 +15,18 @@ RSpec.describe Contract, type: :model do
   it "does not allow a negative amount" do
     expect(build(:contract, amount_cents: -1)).not_to be_valid
   end
+
+  it "requires the client to own the job" do
+    contract = build(:contract, client: build(:user))
+
+    expect(contract).not_to be_valid
+    expect(contract.errors[:client]).to include("must own the job")
+  end
+
+  it "requires the freelancer to have a freelancer profile" do
+    contract = build(:contract, freelancer: build(:user))
+
+    expect(contract).not_to be_valid
+    expect(contract.errors[:freelancer]).to include("must have a freelancer profile")
+  end
 end

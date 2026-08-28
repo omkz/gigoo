@@ -1,9 +1,8 @@
 class User < ApplicationRecord
   enum :role, {
-    freelancer: 0,
-    client: 1,
-    support: 2,
-    admin: 3
+    member: 0,
+    support: 1,
+    admin: 2
   }
 
   has_one :client_profile, dependent: :destroy

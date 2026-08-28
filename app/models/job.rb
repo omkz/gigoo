@@ -10,4 +10,11 @@ class Job < ApplicationRecord
   validates :budget_cents,
     presence: true,
     numericality: { greater_than_or_equal_to: 0, only_integer: true }
+  validate :client_has_client_profile
+
+  private
+
+  def client_has_client_profile
+    errors.add(:client, "must have a client profile") if client.present? && client.client_profile.blank?
+  end
 end

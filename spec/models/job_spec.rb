@@ -15,4 +15,11 @@ RSpec.describe Job, type: :model do
   it "does not allow a negative budget" do
     expect(build(:job, budget_cents: -1)).not_to be_valid
   end
+
+  it "requires the client to have a client profile" do
+    job = build(:job, client: build(:user))
+
+    expect(job).not_to be_valid
+    expect(job.errors[:client]).to include("must have a client profile")
+  end
 end
