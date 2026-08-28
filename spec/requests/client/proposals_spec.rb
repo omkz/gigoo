@@ -27,7 +27,8 @@ RSpec.describe "Client proposals", type: :request do
 
     expect(response).to have_http_status(:ok)
     expect(response.body).to include(job.title, job.status, "$5,000.00")
-    expect(response.body).to include(proposal.freelancer.email_address)
+    expect(response.body).to include(proposal.freelancer.name)
+    expect(response.body).not_to include(proposal.freelancer.email_address)
     expect(response.body).to include(profile.title, profile.location, profile.skills.first)
     expect(response.body).to include("$4,500.00", proposal.message, proposal.status)
   end

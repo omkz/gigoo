@@ -10,22 +10,26 @@ RSpec.describe "Freelancers", type: :request do
   end
 
   it "allows a visitor to browse freelancer profiles" do
-    profile = create(:freelancer_profile, title: "Backend Rails Engineer")
+    user = create(:user, first_name: "Kurnia", last_name: "Muhamad", email_address: "private@example.com")
+    profile = create(:freelancer_profile, user: user, title: "Backend Rails Engineer")
 
     get freelancers_path
 
     expect(response).to have_http_status(:ok)
-    expect(response.body).to include(profile.title, profile.location, profile.skills.first)
+    expect(response.body).to include(user.name, profile.title, profile.location, profile.skills.first)
+    expect(response.body).not_to include(user.email_address)
   end
 
   it "allows a visitor to view a freelancer profile" do
-    profile = create(:freelancer_profile, title: "Marketplace Specialist", bio: "Deep marketplace experience.")
+    user = create(:user, first_name: "Jane", last_name: "Smith", email_address: "jane.private@example.com")
+    profile = create(:freelancer_profile, user: user, title: "Marketplace Specialist", bio: "Deep marketplace experience.")
 
     get freelancer_path(profile)
 
     expect(response).to have_http_status(:ok)
-    expect(response.body).to include(profile.title, profile.bio, profile.location)
+    expect(response.body).to include(user.name, profile.title, profile.bio, profile.location)
     expect(response.body).to include("$250.00/hr", profile.skills.first)
+    expect(response.body).not_to include(user.email_address)
   end
 
   it "filters q across useful profile text and excludes irrelevant profiles" do

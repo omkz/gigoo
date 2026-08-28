@@ -22,6 +22,17 @@ RSpec.describe "Public jobs", type: :request do
     expect(response.body).not_to include(closed_job.title)
   end
 
+  it "shows the client's name and company without exposing their email" do
+    client = create(:user, first_name: "Jane", last_name: "Smith", email_address: "jane.private@example.com")
+    create(:client_profile, user: client, company_name: "Acme Labs")
+    job = create(:job, client: client, status: :open)
+
+    get job_path(job)
+
+    expect(response.body).to include("Acme Labs", "Posted by Jane Smith")
+    expect(response.body).not_to include(client.email_address)
+  end
+
   it "shows newest open jobs first" do
     older_job = create(:job, status: :open, title: "Older job", created_at: 2.days.ago)
     newer_job = create(:job, status: :open, title: "Newer job", created_at: 1.hour.ago)

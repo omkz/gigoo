@@ -31,8 +31,11 @@
           <div class="flex items-start justify-between gap-4">
             <div>
               <h2 class="text-xl font-semibold">
-                <%= link_to freelancer.title.presence || freelancer.user.email_address, freelancer_path(freelancer), class: "hover:text-indigo-600" %>
+                <%= link_to freelancer.user.name, freelancer_path(freelancer), class: "hover:text-indigo-600" %>
               </h2>
+              <% if freelancer.title.present? %>
+                <p class="mt-1 font-medium text-slate-700"><%= freelancer.title %></p>
+              <% end %>
               <% if freelancer.location.present? %>
                 <p class="mt-1 text-sm text-slate-500"><%= freelancer.location %></p>
               <% end %>

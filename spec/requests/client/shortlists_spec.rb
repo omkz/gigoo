@@ -132,7 +132,8 @@ RSpec.describe "Client shortlists", type: :request do
     get client_job_shortlists_path(selected_job)
 
     expect(response).to have_http_status(:ok)
-    expect(response.body).to include(profile.title, profile.location, profile.skills.first, "$250.00/hr")
+    expect(response.body).to include(profile.user.name, profile.title, profile.location, profile.skills.first, "$250.00/hr")
+    expect(response.body).not_to include(profile.user.email_address)
     expect(response.body).to include(freelancer_path(profile))
     expect(response.body).not_to include(hidden_profile.title)
   end

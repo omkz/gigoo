@@ -14,7 +14,10 @@
           <div class="flex h-full flex-col">
             <div class="flex items-start justify-between gap-4">
               <div>
-                <p class="text-sm font-medium text-slate-500"><%= job.client.client_profile&.company_name.presence || "Independent client" %></p>
+                <% if job.client.client_profile&.company_name.present? %>
+                  <p class="text-sm font-medium text-slate-700"><%= job.client.client_profile.company_name %></p>
+                <% end %>
+                <p class="text-sm text-slate-500">Posted by <%= job.client.name %></p>
                 <h2 class="mt-1 text-xl font-semibold"><%= link_to job.title, job_path(job), class: "hover:text-indigo-600" %></h2>
               </div>
               <p class="shrink-0 font-semibold text-slate-800"><%= number_to_currency(job.budget) %></p>

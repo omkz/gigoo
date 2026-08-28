@@ -1,6 +1,8 @@
 Rails.application.routes.draw do
   root "jobs#index"
 
+  get "sign_up", to: "registrations#new", as: :sign_up
+  post "sign_up", to: "registrations#create"
   resource :session
   resources :passwords, param: :token
   namespace :client do

@@ -1,6 +1,31 @@
 require "rails_helper"
 
 RSpec.describe User, type: :model do
+  it "requires a first name" do
+    expect(build(:user, first_name: nil)).not_to be_valid
+  end
+
+  it "requires a last name" do
+    expect(build(:user, last_name: nil)).not_to be_valid
+  end
+
+  it "combines first and last name for display" do
+    user = build(:user, first_name: "Kurnia", last_name: "Muhamad")
+
+    expect(user.name).to eq("Kurnia Muhamad")
+  end
+
+  it "defaults to the member role" do
+    user = described_class.new(
+      first_name: "Kurnia",
+      last_name: "Muhamad",
+      email_address: "kurnia@example.com",
+      password: "password"
+    )
+
+    expect(user).to be_member
+  end
+
   it "uses roles only for system-level privileges" do
     expect(described_class.roles).to eq(
       "member" => 0,
