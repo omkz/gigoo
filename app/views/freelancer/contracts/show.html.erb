@@ -1,0 +1,38 @@
+<% content_for :title, "Contract for #{@contract.job.title} · Gigoo" %>
+
+<section class="mx-auto w-full max-w-3xl">
+  <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+    <p class="text-sm font-semibold uppercase tracking-wide text-emerald-600">Freelancer contract</p>
+    <h1 class="mt-1 text-3xl font-bold tracking-tight"><%= @contract.job.title %></h1>
+
+    <dl class="mt-8 grid gap-6 border-y border-slate-200 py-6 sm:grid-cols-2">
+      <div>
+        <dt class="text-sm text-slate-500">Client</dt>
+        <dd class="mt-1 text-lg font-semibold"><%= @contract.client.name %></dd>
+        <% if @contract.client.client_profile&.company_name.present? %>
+          <dd class="mt-1 text-sm text-slate-600"><%= @contract.client.client_profile.company_name %></dd>
+        <% end %>
+      </div>
+      <div>
+        <dt class="text-sm text-slate-500">Agreed amount</dt>
+        <dd class="mt-1 text-lg font-semibold"><%= number_to_currency(@contract.amount_cents / 100.0) %></dd>
+      </div>
+      <div>
+        <dt class="text-sm text-slate-500">Status</dt>
+        <dd class="mt-1 font-semibold"><%= @contract.status.humanize %></dd>
+      </div>
+      <div>
+        <dt class="text-sm text-slate-500">Started</dt>
+        <dd class="mt-1 font-semibold"><%= @contract.started_at.present? ? l(@contract.started_at, format: :long) : "Not started" %></dd>
+      </div>
+      <div>
+        <dt class="text-sm text-slate-500">Completed</dt>
+        <dd class="mt-1 font-semibold"><%= @contract.completed_at.present? ? l(@contract.completed_at, format: :long) : "In progress" %></dd>
+      </div>
+    </dl>
+  </div>
+
+  <% if @contract.completed? %>
+    <%= render "reviews/form_or_review", contract: @contract, review: @review, title: "Rate client" %>
+  <% end %>
+</section>

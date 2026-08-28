@@ -4,8 +4,10 @@
   <article class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
     <%= link_to "← Browse jobs", jobs_path, class: "text-sm font-semibold text-indigo-600 hover:text-indigo-500" %>
     <% if @job.client.client_profile&.company_name.present? %>
-      <p class="mt-8 text-sm font-medium text-slate-700"><%= @job.client.client_profile.company_name %></p>
-      <p class="mt-1 text-sm text-slate-500">Posted by <%= @job.client.name %></p>
+      <p class="mt-8 text-sm font-medium text-slate-700"><%= link_to @job.client.client_profile.company_name, client_path(@job.client.client_profile), class: "hover:text-indigo-600" %></p>
+      <p class="mt-1 text-sm text-slate-500">Posted by <%= link_to @job.client.name, client_path(@job.client.client_profile), class: "hover:text-indigo-600" %></p>
+    <% elsif @job.client.client_profile.present? %>
+      <p class="mt-8 text-sm text-slate-500">Posted by <%= link_to @job.client.name, client_path(@job.client.client_profile), class: "hover:text-indigo-600" %></p>
     <% else %>
       <p class="mt-8 text-sm text-slate-500">Posted by <%= @job.client.name %></p>
     <% end %>

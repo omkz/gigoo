@@ -27,6 +27,22 @@
         <dt class="text-sm text-slate-500">Started</dt>
         <dd class="mt-1 font-semibold"><%= @contract.started_at.present? ? l(@contract.started_at, format: :long) : "Not started" %></dd>
       </div>
+      <% if @contract.completed_at.present? %>
+        <div>
+          <dt class="text-sm text-slate-500">Completed</dt>
+          <dd class="mt-1 font-semibold"><%= l(@contract.completed_at, format: :long) %></dd>
+        </div>
+      <% end %>
     </dl>
+
+    <% if @contract.active? %>
+      <%= button_to "Mark contract complete", complete_client_contract_path(@contract), method: :patch, class: "mt-6 rounded-lg bg-emerald-600 px-5 py-3 font-semibold text-white hover:bg-emerald-500" %>
+    <% elsif @contract.completed? %>
+      <p class="mt-6 font-semibold text-emerald-700">Completed</p>
+    <% end %>
   </div>
+
+  <% if @contract.completed? %>
+    <%= render "reviews/form_or_review", contract: @contract, review: @review, title: "Rate freelancer" %>
+  <% end %>
 </section>

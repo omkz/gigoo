@@ -66,4 +66,20 @@ RSpec.describe "Freelancers", type: :request do
     expect(response.body).to include(own_job.title, client_job_shortlists_path(own_job))
     expect(response.body).not_to include(other_job.title)
   end
+
+  it "shows grounded received reputation without leaking unrelated reviews or email" do
+    user = create(:user, first_name: "Kurnia", last_name: "Muhamad", email_address: "kurnia.private@example.com")
+    profile = create(:freelancer_profile, user: user)
+    first_contract = create(:contract, :completed, freelancer: user)
+    second_contract = create(:contract, :completed, freelancer: user)
+    first_review = create(:review, contract: first_contract, reviewer: first_contract.client, reviewee: user, rating: 5, body: "Excellent Rails delivery.")
+    second_review = create(:review, contract: second_contract, reviewer: second_contract.client, reviewee: user, rating: 3, body: "Solid implementation.")
+    unrelated = create(:review, body: "Unrelated private feedback.")
+
+    get freelancer_path(profile)
+
+    expect(response.body).to include("4.0 · 2 reviews", first_review.body, second_review.body)
+    expect(response.body).to include(first_review.reviewer.name)
+    expect(response.body).not_to include(unrelated.body, user.email_address, first_review.reviewer.email_address)
+  end
 end

@@ -17,11 +17,20 @@ Rails.application.routes.draw do
         patch :close
       end
     end
+    resources :contracts, only: :show do
+      patch :complete, on: :member
+    end
+  end
+  namespace :freelancer do
     resources :contracts, only: :show
+  end
+  resources :contracts, only: [] do
+    resources :reviews, only: :create
   end
   resources :jobs, only: %i[ index show ] do
     resources :proposals, only: :create
   end
+  resources :clients, only: :show
   resources :freelancers, only: %i[ index show ]
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

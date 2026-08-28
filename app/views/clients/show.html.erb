@@ -1,0 +1,33 @@
+<% content_for :title, "#{@client.user.name} · Gigoo" %>
+
+<section class="mx-auto w-full max-w-4xl">
+  <article class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+    <p class="text-sm text-slate-500">Client profile</p>
+    <% if @client.company_name.present? %>
+      <h1 class="mt-1 text-3xl font-bold tracking-tight"><%= @client.company_name %></h1>
+      <p class="mt-2 font-semibold text-slate-700"><%= @client.user.name %></p>
+    <% else %>
+      <h1 class="mt-1 text-3xl font-bold tracking-tight"><%= @client.user.name %></h1>
+    <% end %>
+
+    <% if @client.location.present? %>
+      <p class="mt-2 text-slate-600"><%= @client.location %></p>
+    <% end %>
+    <p class="mt-4 text-sm font-semibold <%= @client.payment_verified? ? "text-emerald-700" : "text-slate-500" %>">
+      <%= @client.payment_verified? ? "Payment verified" : "Payment not yet verified" %>
+    </p>
+    <% if @client.bio.present? %>
+      <div class="mt-6 whitespace-pre-wrap leading-7 text-slate-700"><%= @client.bio %></div>
+    <% end %>
+  </article>
+
+  <section class="mt-8">
+    <h2 class="text-2xl font-bold">Marketplace reputation</h2>
+    <% if @review_count.positive? %>
+      <p class="mt-2 text-lg font-semibold"><%= number_with_precision(@average_rating, precision: 1) %> · <%= pluralize(@review_count, "review") %></p>
+      <%= render "reviews/public_reviews", reviews: @reviews %>
+    <% else %>
+      <p class="mt-3 text-slate-600">No reviews yet.</p>
+    <% end %>
+  </section>
+</section>

@@ -24,6 +24,16 @@ RSpec.describe Review, type: :model do
     expect(review).to be_valid
   end
 
+  it "allows both parties to review independently" do
+    contract = create(:contract, :completed)
+
+    client_review = create(:review, contract: contract, reviewer: contract.client, reviewee: contract.freelancer)
+    freelancer_review = create(:review, contract: contract, reviewer: contract.freelancer, reviewee: contract.client)
+
+    expect(client_review).to be_persisted
+    expect(freelancer_review).to be_persisted
+  end
+
   it "does not allow the client to review themselves" do
     contract = build(:contract, :completed)
     review = build(:review, contract: contract, reviewer: contract.client, reviewee: contract.client)

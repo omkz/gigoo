@@ -29,7 +29,8 @@ RSpec.describe "Public jobs", type: :request do
 
     get job_path(job)
 
-    expect(response.body).to include("Acme Labs", "Posted by Jane Smith")
+    expect(response.body).to include("Acme Labs", "Posted by", "Jane Smith")
+    expect(response.body).to include(client_path(client.client_profile))
     expect(response.body).not_to include(client.email_address)
   end
 
