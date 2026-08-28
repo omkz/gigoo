@@ -7,6 +7,7 @@ module Client
     def index
       authorize Job
       @jobs = policy_scope(Job).order(created_at: :desc)
+      @proposal_counts = Proposal.where(job: @jobs).group(:job_id).count
     end
 
     def new

@@ -26,5 +26,14 @@ RSpec.describe JobPolicy do
       expect(other_policy).not_to be_publish
       expect(other_policy).not_to be_close
     end
+
+    it "allows only an owning client to view a job's proposals" do
+      job = create(:job)
+      other_client = create(:client_profile).user
+
+      expect(described_class.new(job.client, job)).to be_proposals
+      expect(described_class.new(other_client, job)).not_to be_proposals
+      expect(described_class.new(create(:user), job)).not_to be_proposals
+    end
   end
 end

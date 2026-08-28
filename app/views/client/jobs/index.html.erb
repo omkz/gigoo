@@ -33,6 +33,7 @@
               </div>
 
               <div class="flex flex-wrap gap-2">
+                <%= link_to "View proposals (#{@proposal_counts.fetch(job.id, 0)})", client_job_proposals_path(job), class: "rounded-lg border border-indigo-200 px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-50" %>
                 <%= link_to "Edit", edit_client_job_path(job), class: "rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold hover:bg-slate-50" %>
                 <% if job.draft? %>
                   <%= button_to "Publish", publish_client_job_path(job), method: :patch, class: "rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500" %>

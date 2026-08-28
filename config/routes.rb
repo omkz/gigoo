@@ -5,6 +5,8 @@ Rails.application.routes.draw do
   resources :passwords, param: :token
   namespace :client do
     resources :jobs, except: %i[ show destroy ] do
+      resources :proposals, only: :index
+
       member do
         patch :publish
         patch :close

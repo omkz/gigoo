@@ -35,6 +35,20 @@ RSpec.describe "Client jobs", type: :request do
     expect(response.body).not_to include(other_job.title)
   end
 
+  it "shows each owned job's proposal count and link" do
+    user = client_user
+    job_with_proposals = create(:job, client: user, title: "Popular job")
+    job_without_proposals = create(:job, client: user, title: "New job")
+    create(:proposal, job: job_with_proposals)
+    create(:proposal, job: job_with_proposals)
+    sign_in(user)
+
+    get client_jobs_path
+
+    expect(response.body).to include(client_job_proposals_path(job_with_proposals), "View proposals (2)")
+    expect(response.body).to include(client_job_proposals_path(job_without_proposals), "View proposals (0)")
+  end
+
   it "allows a client-profile user to create a draft job" do
     user = client_user
     sign_in(user)
