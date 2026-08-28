@@ -8,6 +8,7 @@ module Client
       authorize Job
       @jobs = policy_scope(Job).order(created_at: :desc)
       @proposal_counts = Proposal.where(job: @jobs).group(:job_id).count
+      @shortlist_counts = Shortlist.where(job: @jobs).group(:job_id).count
     end
 
     def new

@@ -49,6 +49,20 @@ RSpec.describe "Client jobs", type: :request do
     expect(response.body).to include(client_job_proposals_path(job_without_proposals), "View proposals (0)")
   end
 
+  it "shows each owned job's shortlist count and link" do
+    user = client_user
+    shortlisted_job = create(:job, client: user, title: "Shortlisted job")
+    empty_job = create(:job, client: user, title: "Empty shortlist job")
+    create(:shortlist, job: shortlisted_job, client: user)
+    create(:shortlist, job: shortlisted_job, client: user)
+    sign_in(user)
+
+    get client_jobs_path
+
+    expect(response.body).to include(client_job_shortlists_path(shortlisted_job), "Shortlist (2)")
+    expect(response.body).to include(client_job_shortlists_path(empty_job), "Shortlist (0)")
+  end
+
   it "allows a client-profile user to create a draft job" do
     user = client_user
     sign_in(user)

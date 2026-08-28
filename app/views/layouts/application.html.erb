@@ -29,6 +29,7 @@
         <%= link_to "Gigoo", jobs_path, class: "text-xl font-bold tracking-tight text-slate-900" %>
         <nav class="flex items-center gap-4 text-sm font-semibold">
           <%= link_to "Browse jobs", jobs_path, class: "text-slate-600 hover:text-indigo-600" %>
+          <%= link_to "Find freelancers", freelancers_path, class: "text-slate-600 hover:text-indigo-600" %>
           <% if authenticated? %>
             <% if Current.user.client_profile.present? %>
               <%= link_to "My jobs", client_jobs_path, class: "text-slate-600 hover:text-indigo-600" %>

@@ -23,6 +23,10 @@ class JobPolicy < ApplicationPolicy
     update?
   end
 
+  def shortlist?
+    update?
+  end
+
   class Scope < ApplicationPolicy::Scope
     def resolve
       return scope.none unless user.client_profile.present?

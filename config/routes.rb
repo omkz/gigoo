@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   namespace :client do
     resources :jobs, except: %i[ show destroy ] do
       resources :proposals, only: :index
+      resources :shortlists, only: %i[ index create destroy ]
 
       member do
         patch :publish
@@ -16,6 +17,7 @@ Rails.application.routes.draw do
   resources :jobs, only: %i[ index show ] do
     resources :proposals, only: :create
   end
+  resources :freelancers, only: %i[ index show ]
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
