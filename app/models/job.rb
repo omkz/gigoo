@@ -3,6 +3,7 @@ class Job < ApplicationRecord
 
   has_many :proposals, dependent: :destroy
   has_many :shortlists, dependent: :destroy
+  has_one :contract
 
   enum :status, { draft: 0, open: 1, closed: 2 }
 

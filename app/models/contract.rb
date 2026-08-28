@@ -10,6 +10,7 @@ class Contract < ApplicationRecord
   validates :amount_cents,
     presence: true,
     numericality: { greater_than_or_equal_to: 0, only_integer: true }
+  validates :job_id, uniqueness: true
   validate :client_owns_job
   validate :freelancer_has_freelancer_profile
   validate :client_is_not_freelancer

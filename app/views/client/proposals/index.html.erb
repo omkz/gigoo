@@ -66,6 +66,15 @@
             <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Proposal message</h3>
             <div class="mt-2 whitespace-pre-wrap leading-7 text-slate-700"><%= proposal.message %></div>
             <p class="mt-4 text-sm text-slate-500">Submitted <%= l(proposal.created_at.to_date, format: :long) %></p>
+
+            <% if @job.open? && @job.contract.blank? && proposal.pending? %>
+              <%= button_to "Accept proposal", accept_client_job_proposal_path(@job, proposal), method: :patch, class: "mt-5 rounded-lg bg-emerald-600 px-4 py-2.5 font-semibold text-white hover:bg-emerald-500" %>
+            <% elsif proposal.accepted? && @job.contract.present? %>
+              <div class="mt-5 flex flex-wrap items-center gap-4">
+                <span class="font-semibold text-emerald-700">Contract <%= @job.contract.status %></span>
+                <%= link_to "View contract", client_contract_path(@job.contract), class: "font-semibold text-indigo-600 hover:text-indigo-500" %>
+              </div>
+            <% end %>
           </div>
         </article>
       <% end %>

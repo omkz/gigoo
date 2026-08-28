@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_28_060000) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_28_070000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -37,7 +37,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_28_060000) do
     t.datetime "updated_at", null: false
     t.index ["client_id"], name: "index_contracts_on_client_id"
     t.index ["freelancer_id"], name: "index_contracts_on_freelancer_id"
-    t.index ["job_id"], name: "index_contracts_on_job_id"
+    t.index ["job_id"], name: "index_contracts_on_job_id", unique: true
   end
 
   create_table "freelancer_profiles", force: :cascade do |t|

@@ -7,7 +7,9 @@ Rails.application.routes.draw do
   resources :passwords, param: :token
   namespace :client do
     resources :jobs, except: %i[ show destroy ] do
-      resources :proposals, only: :index
+      resources :proposals, only: :index do
+        patch :accept, on: :member
+      end
       resources :shortlists, only: %i[ index create destroy ]
 
       member do
@@ -15,6 +17,7 @@ Rails.application.routes.draw do
         patch :close
       end
     end
+    resources :contracts, only: :show
   end
   resources :jobs, only: %i[ index show ] do
     resources :proposals, only: :create

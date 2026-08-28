@@ -12,6 +12,27 @@ RSpec.describe Contract, type: :model do
     expect(association.options[:dependent]).to eq(:destroy)
   end
 
+  it "allows only one contract per job" do
+    contract = create(:contract)
+    duplicate = build(:contract, job: contract.job)
+
+    expect(duplicate).not_to be_valid
+    expect(duplicate.errors[:job_id]).to be_present
+  end
+
+  it "enforces one contract per job in the database" do
+    contract = create(:contract)
+    duplicate = build(:contract, job: contract.job)
+
+    expect { duplicate.save!(validate: false) }.to raise_error(ActiveRecord::RecordNotUnique)
+  end
+
+  it "has a unique database index on job_id" do
+    index = described_class.connection.indexes(:contracts).find { |candidate| candidate.columns == [ "job_id" ] }
+
+    expect(index.unique).to be(true)
+  end
+
   it "does not allow a negative amount" do
     expect(build(:contract, amount_cents: -1)).not_to be_valid
   end
