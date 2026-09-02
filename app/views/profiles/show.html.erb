@@ -7,6 +7,25 @@
     <p class="mt-2 text-slate-600">Manage your freelancer and client presence from one account.</p>
   </div>
 
+  <article class="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <p class="text-sm font-semibold uppercase tracking-wide text-slate-500">Account</p>
+
+    <dl class="mt-5 space-y-4 text-sm">
+      <div>
+        <dt class="font-semibold text-slate-500">Name</dt>
+        <dd class="mt-1 text-slate-800"><%= @user.name %></dd>
+      </div>
+      <div>
+        <dt class="font-semibold text-slate-500">Email</dt>
+        <dd class="mt-1 text-slate-800"><%= @user.email_address %></dd>
+      </div>
+    </dl>
+
+    <div class="mt-6 border-t border-slate-200 pt-5">
+      <%= link_to "Edit account", edit_profile_account_path, class: "font-semibold text-indigo-600 hover:text-indigo-500" %>
+    </div>
+  </article>
+
   <div class="mt-8 grid gap-6 <%= "lg:grid-cols-2" if @freelancer_profile && @client_profile %>">
     <% if @freelancer_profile %>
       <article class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">

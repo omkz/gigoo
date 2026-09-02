@@ -207,4 +207,81 @@ RSpec.describe "Self-service profiles", type: :request do
 
     expect(response.body).to include(%(href="#{profile_path}"), ">Profile</a>")
   end
+
+  it "shows the account section with name, email, and an edit link" do
+    user = create(:user, first_name: "Kurnia", last_name: "Muhamad", email_address: "kurnia@example.com")
+    sign_in(user)
+
+    get profile_path
+
+    expect(response.body).to include("Account", "Kurnia Muhamad", "kurnia@example.com", "Edit account", edit_profile_account_path)
+  end
+
+  it "renders the account section for a user with no marketplace capability yet" do
+    user = create(:user, first_name: "Nia", last_name: "Solo")
+    sign_in(user)
+
+    get profile_path
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Account", "Nia Solo", user.email_address, "Choose a capability", onboarding_path)
+  end
+
+  it "requires authentication to edit the account" do
+    get edit_profile_account_path
+    expect(response).to redirect_to(new_session_path)
+
+    patch profile_account_path, params: { user: { first_name: "Nope" } }
+    expect(response).to redirect_to(new_session_path)
+  end
+
+  it "updates the authenticated user's first and last name" do
+    user = create(:user, first_name: "Old", last_name: "Name")
+    sign_in(user)
+
+    patch profile_account_path, params: { user: { first_name: "New", last_name: "Person" } }
+
+    expect(response).to redirect_to(profile_path)
+    follow_redirect!
+    expect(response.body).to include("Account was updated.")
+    expect(user.reload).to have_attributes(first_name: "New", last_name: "Person")
+  end
+
+  it "does not allow email_address or role to be changed through the account form" do
+    user = create(:user, email_address: "original@example.com", role: :member)
+    sign_in(user)
+
+    patch profile_account_path, params: {
+      user: { first_name: "New", email_address: "hijacked@example.com", role: "admin" }
+    }
+
+    expect(response).to redirect_to(profile_path)
+    user.reload
+    expect(user.email_address).to eq("original@example.com")
+    expect(user).to be_member
+    expect(user.first_name).to eq("New")
+  end
+
+  it "ignores a spoofed user_id and only ever updates the authenticated user" do
+    user = create(:user, first_name: "Mine")
+    other_user = create(:user, first_name: "Theirs")
+    sign_in(user)
+
+    patch profile_account_path, params: { user: { first_name: "Changed", user_id: other_user.id } }
+
+    expect(response).to redirect_to(profile_path)
+    expect(user.reload.first_name).to eq("Changed")
+    expect(other_user.reload.first_name).to eq("Theirs")
+  end
+
+  it "renders validation errors for the account form with a 422 status" do
+    user = create(:user, first_name: "Keep")
+    sign_in(user)
+
+    patch profile_account_path, params: { user: { first_name: "", last_name: "" } }
+
+    expect(response).to have_http_status(:unprocessable_content)
+    expect(response.body).to include("First name can&#39;t be blank", "Last name can&#39;t be blank")
+    expect(user.reload.first_name).to eq("Keep")
+  end
 end

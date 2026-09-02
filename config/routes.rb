@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   resource :onboarding, only: %i[ show update ]
   resource :profile, only: :show
   namespace :profile do
+    resource :account, only: %i[ edit update ]
     resource :freelancer, only: %i[ edit update ]
     resource :client, only: %i[ edit update ]
   end
