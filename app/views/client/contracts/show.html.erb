@@ -1,7 +1,10 @@
 <% content_for :title, "Contract for #{@contract.job.title} · Gigoo" %>
 
 <section class="mx-auto w-full max-w-3xl">
-  <%= link_to "← Proposals", client_job_proposals_path(@contract.job), class: "text-sm font-semibold text-indigo-600 hover:text-indigo-500" %>
+  <div class="flex flex-wrap items-center gap-4">
+    <%= link_to "← My Jobs", client_jobs_path, class: "text-sm font-semibold text-indigo-600 hover:text-indigo-500" %>
+    <%= link_to "View proposal history", client_job_proposals_path(@contract.job), class: "text-sm font-semibold text-slate-500 hover:text-slate-700" %>
+  </div>
 
   <div class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
     <p class="text-sm font-semibold uppercase tracking-wide text-emerald-600">Contract</p>

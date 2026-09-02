@@ -6,7 +6,7 @@ module Client
 
     def index
       authorize Job
-      @jobs = policy_scope(Job).order(created_at: :desc)
+      @jobs = policy_scope(Job).includes(:contract).order(created_at: :desc)
       @proposal_counts = Proposal.where(job: @jobs).where.not(status: :draft).group(:job_id).count
       @shortlist_counts = Shortlist.where(job: @jobs).group(:job_id).count
     end

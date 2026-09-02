@@ -167,4 +167,117 @@ RSpec.describe "Client jobs", type: :request do
     expect(response).to have_http_status(:unprocessable_content)
     expect(response.body).to include("prevented this job from being saved")
   end
+
+  it "requires client capability to view My Jobs" do
+    sign_in(create(:user))
+
+    get client_jobs_path
+
+    expect(response).to have_http_status(:forbidden)
+  end
+
+  it "keeps the normal management actions for a job without a contract" do
+    job = create(:job, status: :open)
+    sign_in(job.client)
+
+    get client_jobs_path
+
+    expect(response.body).to include(edit_client_job_path(job))
+    expect(response.body).to include(close_client_job_path(job))
+    expect(response.body).not_to include("View contract")
+  end
+
+  it "shows a View contract action and Active status for a job with an active contract" do
+    contract = create(:contract, status: :active)
+    job = contract.job
+    sign_in(job.client)
+
+    get client_jobs_path
+
+    expect(response.body).to include(client_contract_path(contract), "View contract")
+    expect(response.body).to include("Contract: Active")
+  end
+
+  it "shows Completed status for a job with a completed contract" do
+    contract = create(:contract, :completed)
+    job = contract.job
+    sign_in(job.client)
+
+    get client_jobs_path
+
+    expect(response.body).to include(client_contract_path(contract), "View contract")
+    expect(response.body).to include("Contract: Completed")
+  end
+
+  it "does not show Edit, Publish, or Close for a job that already has a contract" do
+    contract = create(:contract)
+    job = contract.job
+    sign_in(job.client)
+
+    get client_jobs_path
+
+    expect(response.body).not_to include(edit_client_job_path(job))
+    expect(response.body).not_to include(publish_client_job_path(job))
+    expect(response.body).not_to include(close_client_job_path(job))
+    expect(response.body).not_to include("Publish")
+    expect(response.body).not_to include(">Close<")
+  end
+
+  it "does not present a job with a contract as still open for hiring" do
+    contract = create(:contract)
+    job = contract.job
+    sign_in(job.client)
+
+    get client_jobs_path
+
+    expect(response.body).not_to include("View proposals (")
+    expect(response.body).not_to include("Accept proposal")
+    expect(response.body).to include("View proposal history")
+  end
+
+  it "exposes the newly created contract in My Jobs after a proposal is accepted" do
+    job = create(:job, status: :open)
+    proposal = create(:proposal, job: job)
+    sign_in(job.client)
+
+    patch accept_client_job_proposal_path(job, proposal)
+    contract = job.reload.contract
+    expect(contract).to be_present
+
+    get client_jobs_path
+
+    expect(response.body).to include(client_contract_path(contract), "View contract", "Contract: Active")
+  end
+
+  it "reflects contract completion in My Jobs without creating another contract" do
+    contract = create(:contract, status: :active)
+    job = contract.job
+    sign_in(job.client)
+
+    patch complete_client_contract_path(contract)
+
+    get client_jobs_path
+
+    expect(Contract.where(job: job).count).to eq(1)
+    expect(response.body).to include("Contract: Completed")
+  end
+
+  it "eager loads contracts on My Jobs to avoid N+1 queries" do
+    user = client_user
+    5.times { create(:contract, job: create(:job, client: user, status: :closed)) }
+    3.times { create(:job, client: user, status: :open) }
+    sign_in(user)
+
+    queries = []
+    callback = ->(*, started, finished, unique_id, payload) {
+      queries << payload[:sql] if payload[:sql].match?(/\ASELECT/i) && payload[:name] != "SCHEMA"
+    }
+
+    ActiveSupport::Notifications.subscribed(callback, "sql.active_record") do
+      get client_jobs_path
+    end
+
+    contract_queries = queries.select { |sql| sql.include?('"contracts"') }
+    expect(contract_queries.length).to be <= 1
+  end
 end

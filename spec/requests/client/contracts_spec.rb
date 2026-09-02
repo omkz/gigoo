@@ -23,6 +23,15 @@ RSpec.describe "Client contracts", type: :request do
     expect(response.body).to include("$4,500.00", "Active", "Mark contract complete")
   end
 
+  it "includes a clear way back to My Jobs" do
+    contract = create(:contract)
+    sign_in(contract.client)
+
+    get client_contract_path(contract)
+
+    expect(response.body).to include(client_jobs_path, "My Jobs")
+  end
+
   it "redirects an unauthenticated visitor to sign in" do
     get client_contract_path(create(:contract))
 
