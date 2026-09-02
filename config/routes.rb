@@ -4,6 +4,11 @@ Rails.application.routes.draw do
   get "sign_up", to: "registrations#new", as: :sign_up
   post "sign_up", to: "registrations#create"
   resource :onboarding, only: %i[ show update ]
+  resource :profile, only: :show
+  namespace :profile do
+    resource :freelancer, only: %i[ edit update ]
+    resource :client, only: %i[ edit update ]
+  end
   resource :session
   resources :passwords, param: :token
   namespace :client do

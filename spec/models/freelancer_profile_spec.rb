@@ -7,6 +7,24 @@ RSpec.describe FreelancerProfile, type: :model do
     expect(build(:freelancer_profile, hourly_rate_cents: -1)).not_to be_valid
   end
 
+  it "converts an hourly rate in dollars to cents" do
+    profile = build(:freelancer_profile, hourly_rate: "123.45")
+
+    expect(profile.hourly_rate_cents).to eq(12_345)
+    expect(profile.hourly_rate).to eq("123.45")
+    expect(profile).to be_valid
+  end
+
+  it "rejects a malformed hourly rate while still allowing a blank rate" do
+    malformed = build(:freelancer_profile, hourly_rate: "many")
+    blank = build(:freelancer_profile, hourly_rate: "")
+
+    expect(malformed).not_to be_valid
+    expect(malformed.errors[:hourly_rate]).to include("must be a non-negative number")
+    expect(blank).to be_valid
+    expect(blank.hourly_rate_cents).to be_nil
+  end
+
   it "allows only one profile per user" do
     profile = create(:freelancer_profile)
 

@@ -5,6 +5,27 @@ class FreelancerProfile < ApplicationRecord
   validates :hourly_rate_cents,
     numericality: { greater_than_or_equal_to: 0, only_integer: true },
     allow_nil: true
+  validate :hourly_rate_input_is_valid
+
+  def hourly_rate
+    return @hourly_rate_input if defined?(@hourly_rate_input)
+
+    BigDecimal(hourly_rate_cents.to_s) / 100 if hourly_rate_cents.present?
+  end
+
+  def hourly_rate=(value)
+    @hourly_rate_input = value
+    @hourly_rate_input_invalid = false
+    self.hourly_rate_cents = if value.present?
+      amount = BigDecimal(value.to_s)
+      raise ArgumentError unless amount.finite?
+
+      (amount * 100).round.to_i
+    end
+  rescue ArgumentError
+    @hourly_rate_input_invalid = true
+    self.hourly_rate_cents = nil
+  end
 
   def self.trust_evidence_for(user_ids)
     user_ids = user_ids.compact.uniq
@@ -61,5 +82,11 @@ class FreelancerProfile < ApplicationRecord
       .having("COUNT(*) >= 2")
       .count
       .size
+  end
+
+  private
+
+  def hourly_rate_input_is_valid
+    errors.add(:hourly_rate, "must be a non-negative number") if @hourly_rate_input_invalid
   end
 end

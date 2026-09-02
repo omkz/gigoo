@@ -1,0 +1,45 @@
+<% content_for :title, "Edit client profile · Gigoo" %>
+
+<section class="mx-auto w-full max-w-2xl">
+  <p class="text-sm font-semibold uppercase tracking-wide text-emerald-600">Client profile</p>
+  <h1 class="mt-1 text-3xl font-bold tracking-tight">Edit client profile</h1>
+
+  <div class="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+    <%= form_with model: @client_profile, scope: :client_profile, url: profile_client_path, class: "space-y-6" do |form| %>
+      <% if @client_profile.errors.any? %>
+        <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+          <h2 class="font-semibold"><%= pluralize(@client_profile.errors.count, "error") %> prevented this profile from being saved:</h2>
+          <ul class="mt-2 list-disc space-y-1 pl-5 text-sm">
+            <% @client_profile.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div>
+        <%= form.label :company_name, "Company name", class: "block text-sm font-semibold text-slate-700" %>
+        <%= form.text_field :company_name, autofocus: true, class: "mt-2 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" %>
+      </div>
+
+      <div>
+        <%= form.label :location, class: "block text-sm font-semibold text-slate-700" %>
+        <%= form.text_field :location, class: "mt-2 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" %>
+      </div>
+
+      <div>
+        <%= form.label :bio, class: "block text-sm font-semibold text-slate-700" %>
+        <%= form.text_area :bio, rows: 7, class: "mt-2 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" %>
+      </div>
+
+      <div class="rounded-lg bg-slate-50 p-4 text-sm text-slate-600">
+        Payment verification is managed by Gigoo and cannot be changed here.
+      </div>
+
+      <div class="flex items-center gap-3">
+        <%= form.submit "Save changes", class: "rounded-lg bg-indigo-600 px-5 py-3 font-semibold text-white hover:bg-indigo-500" %>
+        <%= link_to "Cancel", profile_path, class: "rounded-lg px-4 py-3 font-semibold text-slate-600 hover:bg-slate-100" %>
+      </div>
+    <% end %>
+  </div>
+</section>
