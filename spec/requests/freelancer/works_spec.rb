@@ -157,6 +157,7 @@ RSpec.describe "Freelancer My Work", type: :request do
     expect(response.body).not_to include(">My jobs</a>")
 
     client = create(:client_profile).user
+    reset!
     sign_in(client)
     get jobs_path
     expect(response.body).to include(">My jobs</a>")
@@ -165,9 +166,16 @@ RSpec.describe "Freelancer My Work", type: :request do
     dual_user = create(:user)
     create(:freelancer_profile, user: dual_user)
     create(:client_profile, user: dual_user)
+    reset!
     sign_in(dual_user)
     get jobs_path
-    expect(response.body).to include(">My work</a>", ">My jobs</a>")
+    expect(response.body).to include(">My work</a>")
+    expect(response.body).not_to include(">My jobs</a>")
+
+    patch workspace_path, params: { workspace: "client" }
+    get jobs_path
+    expect(response.body).to include(">My jobs</a>")
+    expect(response.body).not_to include(">My work</a>")
   end
 
   it "shows a WebMCP-created proposal draft" do

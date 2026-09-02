@@ -2,6 +2,8 @@ module Freelancer
   class ContractsController < ApplicationController
     rescue_from Pundit::NotAuthorizedError, with: :forbid_access
 
+    sets_active_workspace :freelancer
+
     def show
       @contract = Contract.includes(:job, client: :client_profile).find(params[:id])
       authorize @contract, :show_freelancer?

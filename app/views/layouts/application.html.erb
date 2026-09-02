@@ -27,19 +27,29 @@
     <header class="border-b border-slate-200 bg-white">
       <div class="container mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
         <%= link_to "Gigoo", jobs_path, class: "text-xl font-bold tracking-tight text-slate-900" %>
-        <nav class="flex items-center gap-4 text-sm font-semibold">
-          <%= link_to "Browse jobs", jobs_path, class: "text-slate-600 hover:text-indigo-600" %>
-          <%= link_to "Find freelancers", freelancers_path, class: "text-slate-600 hover:text-indigo-600" %>
+        <nav class="flex flex-wrap items-center gap-4 text-sm font-semibold">
           <% if authenticated? %>
-            <% if Current.user.freelancer_profile.present? %>
+            <% if current_workspace == "freelancer" %>
+              <%= link_to "Browse jobs", jobs_path, class: "text-slate-600 hover:text-indigo-600" %>
               <%= link_to "My work", freelancer_work_path, class: "text-slate-600 hover:text-indigo-600" %>
-            <% end %>
-            <% if Current.user.client_profile.present? %>
+            <% elsif current_workspace == "client" %>
+              <%= link_to "Find freelancers", freelancers_path, class: "text-slate-600 hover:text-indigo-600" %>
               <%= link_to "My jobs", client_jobs_path, class: "text-slate-600 hover:text-indigo-600" %>
+              <%= link_to "Post a job", new_client_job_path, class: "text-slate-600 hover:text-indigo-600" %>
+            <% else %>
+              <%= link_to "Browse jobs", jobs_path, class: "text-slate-600 hover:text-indigo-600" %>
+              <%= link_to "Find freelancers", freelancers_path, class: "text-slate-600 hover:text-indigo-600" %>
             <% end %>
+
+            <% if dual_capability_workspace? %>
+              <%= render "layouts/workspace_switcher" %>
+            <% end %>
+
             <%= link_to "Profile", profile_path, class: "text-slate-600 hover:text-indigo-600" %>
             <%= button_to "Sign out", session_path, method: :delete, class: "text-slate-600 hover:text-indigo-600" %>
           <% else %>
+            <%= link_to "Browse jobs", jobs_path, class: "text-slate-600 hover:text-indigo-600" %>
+            <%= link_to "Find freelancers", freelancers_path, class: "text-slate-600 hover:text-indigo-600" %>
             <%= link_to "Sign in", new_session_path, class: "text-slate-600 hover:text-indigo-600" %>
           <% end %>
         </nav>

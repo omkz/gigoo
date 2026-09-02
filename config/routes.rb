@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   get "sign_up", to: "registrations#new", as: :sign_up
   post "sign_up", to: "registrations#create"
   resource :onboarding, only: %i[ show update ]
+  resource :workspace, only: :update
   resource :profile, only: :show
   namespace :profile do
     resource :account, only: %i[ edit update ]

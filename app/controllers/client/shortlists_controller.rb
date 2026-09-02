@@ -2,6 +2,8 @@ module Client
   class ShortlistsController < ApplicationController
     rescue_from Pundit::NotAuthorizedError, with: :forbid_access
 
+    sets_active_workspace :client
+
     before_action :set_job
 
     def index

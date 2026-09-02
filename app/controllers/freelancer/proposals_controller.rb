@@ -2,6 +2,8 @@ module Freelancer
   class ProposalsController < ApplicationController
     rescue_from Pundit::NotAuthorizedError, with: :forbid_access
 
+    sets_active_workspace :freelancer
+
     before_action :set_proposal
 
     def edit

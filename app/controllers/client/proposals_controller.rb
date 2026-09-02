@@ -2,6 +2,8 @@ module Client
   class ProposalsController < ApplicationController
     rescue_from Pundit::NotAuthorizedError, with: :forbid_access
 
+    sets_active_workspace :client
+
     def index
       @job = Job.includes(:contract).find(params[:job_id])
       authorize @job, :proposals?

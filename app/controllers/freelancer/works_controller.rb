@@ -2,6 +2,8 @@ module Freelancer
   class WorksController < ApplicationController
     rescue_from Pundit::NotAuthorizedError, with: :forbid_access
 
+    sets_active_workspace :freelancer
+
     def show
       authorize :work, :show?
 

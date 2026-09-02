@@ -1,0 +1,13 @@
+<details class="relative">
+  <summary class="cursor-pointer select-none list-none rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+    <%= current_workspace.capitalize %> &#9662;
+  </summary>
+  <div class="absolute right-0 z-10 mt-2 w-40 rounded-lg border border-slate-200 bg-white p-1 shadow-lg">
+    <% Workspace::VALID.each do |workspace| %>
+      <%= button_to workspace.capitalize, workspace_path,
+        method: :patch,
+        params: { workspace: workspace },
+        class: "block w-full rounded-md px-3 py-2 text-left text-sm font-semibold #{workspace == current_workspace ? "bg-indigo-50 text-indigo-700" : "text-slate-700 hover:bg-slate-50"}" %>
+    <% end %>
+  </div>
+</details>
