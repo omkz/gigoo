@@ -29,6 +29,10 @@
         <%= link_to "Gigoo", jobs_path, class: "text-xl font-bold tracking-tight text-slate-900" %>
         <nav class="flex flex-wrap items-center gap-4 text-sm font-semibold">
           <% if authenticated? %>
+            <% if dual_capability_workspace? %>
+              <%= render "layouts/workspace_switcher" %>
+            <% end %>
+
             <% if current_workspace == "freelancer" %>
               <%= link_to "Browse jobs", jobs_path, class: "text-slate-600 hover:text-indigo-600" %>
               <%= link_to "My work", freelancer_work_path, class: "text-slate-600 hover:text-indigo-600" %>
@@ -39,10 +43,6 @@
             <% else %>
               <%= link_to "Browse jobs", jobs_path, class: "text-slate-600 hover:text-indigo-600" %>
               <%= link_to "Find freelancers", freelancers_path, class: "text-slate-600 hover:text-indigo-600" %>
-            <% end %>
-
-            <% if dual_capability_workspace? %>
-              <%= render "layouts/workspace_switcher" %>
             <% end %>
 
             <%= link_to "Profile", profile_path, class: "text-slate-600 hover:text-indigo-600" %>

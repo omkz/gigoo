@@ -77,6 +77,28 @@ RSpec.describe "Marketplace workspace switching", type: :request do
     expect(response.body).not_to include("&#9662;")
   end
 
+  it "places the workspace switcher before workspace-specific links for a dual-capability user" do
+    user = dual_capability_user
+    sign_in(user)
+
+    get jobs_path
+    switcher_index = response.body.index("Freelancer &#9662;")
+    browse_jobs_index = response.body.index(">Browse jobs</a>")
+    my_work_index = response.body.index(">My work</a>")
+    expect(switcher_index).to be < browse_jobs_index
+    expect(switcher_index).to be < my_work_index
+
+    patch workspace_path, params: { workspace: "client" }
+    get jobs_path
+    switcher_index = response.body.index("Client &#9662;")
+    find_freelancers_index = response.body.index(">Find freelancers</a>")
+    my_jobs_index = response.body.index(">My jobs</a>")
+    post_a_job_index = response.body.index(">Post a job</a>")
+    expect(switcher_index).to be < find_freelancers_index
+    expect(switcher_index).to be < my_jobs_index
+    expect(switcher_index).to be < post_a_job_index
+  end
+
   it "updates the session when switching from freelancer to client" do
     user = dual_capability_user
     sign_in(user)
