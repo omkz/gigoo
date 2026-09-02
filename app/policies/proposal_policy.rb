@@ -25,4 +25,12 @@ class ProposalPolicy < ApplicationPolicy
       record.draft? &&
       record.job.open?
   end
+
+  def submit?
+    user.present? &&
+      user.freelancer_profile.present? &&
+      record.freelancer == user &&
+      record.draft? &&
+      record.job.open?
+  end
 end

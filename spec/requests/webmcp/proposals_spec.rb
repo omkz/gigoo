@@ -165,4 +165,21 @@ RSpec.describe "WebMCP proposal drafts", type: :request do
       expect(response.parsed_body.fetch("error")).to include("Amount cents must be greater than 0", "Message can't be blank")
     end
   end
+
+  it "does not expose a WebMCP proposal submission tool" do
+    source = Rails.root.join("app/javascript/webmcp.js").read
+    registered_tools = source.scan(/name:\s*"([^"]+)"/).flatten
+
+    expect(registered_tools).to contain_exactly(
+      "search_jobs",
+      "get_job",
+      "search_freelancers",
+      "get_freelancer",
+      "get_client",
+      "add_to_shortlist",
+      "remove_from_shortlist",
+      "create_proposal_draft"
+    )
+    expect(source).not_to include('name: "submit_proposal"')
+  end
 end

@@ -18,6 +18,17 @@ module Freelancer
       end
     end
 
+    def submit
+      ApplicationRecord.transaction do
+        @proposal.job.lock!
+        @proposal.lock!
+        authorize @proposal, :submit?
+        @proposal.update!(status: :pending)
+      end
+
+      redirect_to job_path(@proposal.job), notice: "Proposal was submitted to the client."
+    end
+
     private
 
     def set_proposal

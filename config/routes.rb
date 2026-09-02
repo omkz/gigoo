@@ -23,7 +23,9 @@ Rails.application.routes.draw do
   end
   namespace :freelancer do
     resources :contracts, only: :show
-    resources :proposals, only: %i[ edit update ]
+    resources :proposals, only: %i[ edit update ] do
+      patch :submit, on: :member
+    end
   end
   resources :contracts, only: [] do
     resources :reviews, only: :create
