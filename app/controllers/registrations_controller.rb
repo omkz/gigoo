@@ -10,7 +10,7 @@ class RegistrationsController < ApplicationController
 
     if @user.save
       start_new_session_for(@user)
-      redirect_to root_path, notice: "Welcome to Gigoo."
+      redirect_to onboarding_path, notice: "Welcome to Gigoo."
     else
       render :new, status: :unprocessable_content
     end

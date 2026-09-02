@@ -1,0 +1,45 @@
+<% content_for :title, "Choose how to use Gigoo · Gigoo" %>
+
+<section class="mx-auto w-full max-w-4xl">
+  <div class="text-center">
+    <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">One account, flexible possibilities</p>
+    <h1 class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">What brings you to Gigoo?</h1>
+    <p class="mx-auto mt-3 max-w-2xl text-slate-600">Choose how you want to start. The same Gigoo account can be used to find work, hire talent, or do both.</p>
+  </div>
+
+  <% if @error %>
+    <p class="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-red-800"><%= @error %></p>
+  <% end %>
+
+  <div class="mt-8 grid gap-5 md:grid-cols-3">
+    <article class="flex flex-col rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 class="text-xl font-semibold">Find work</h2>
+      <p class="mt-3 flex-1 text-slate-600">Create a freelancer presence and find projects.</p>
+      <%= button_to "Find work",
+        onboarding_path,
+        method: :patch,
+        params: { capability: "find_work" },
+        class: "mt-6 w-full rounded-lg bg-indigo-600 px-4 py-3 font-semibold text-white hover:bg-indigo-500" %>
+    </article>
+
+    <article class="flex flex-col rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 class="text-xl font-semibold">Hire talent</h2>
+      <p class="mt-3 flex-1 text-slate-600">Post jobs and hire freelancers.</p>
+      <%= button_to "Hire talent",
+        onboarding_path,
+        method: :patch,
+        params: { capability: "hire_talent" },
+        class: "mt-6 w-full rounded-lg bg-emerald-600 px-4 py-3 font-semibold text-white hover:bg-emerald-500" %>
+    </article>
+
+    <article class="flex flex-col rounded-xl border border-indigo-200 bg-indigo-50 p-6 shadow-sm">
+      <h2 class="text-xl font-semibold">Both</h2>
+      <p class="mt-3 flex-1 text-slate-600">Use the same Gigoo account for freelancing and hiring.</p>
+      <%= button_to "Both",
+        onboarding_path,
+        method: :patch,
+        params: { capability: "both" },
+        class: "mt-6 w-full rounded-lg bg-slate-900 px-4 py-3 font-semibold text-white hover:bg-slate-700" %>
+    </article>
+  </div>
+</section>

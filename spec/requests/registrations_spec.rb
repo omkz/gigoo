@@ -28,10 +28,10 @@ RSpec.describe "Registrations", type: :request do
     expect(user.last_name).to eq("Muhamad")
     expect(user).to be_member
     expect(Session.order(:created_at).last.user).to eq(user)
-    expect(response).to redirect_to(root_path)
+    expect(response).to redirect_to(onboarding_path)
 
     follow_redirect!
-    expect(response.body).to include("Sign out")
+    expect(response.body).to include("What brings you to Gigoo?", "Sign out")
   end
 
   it "rejects a duplicate email address" do
