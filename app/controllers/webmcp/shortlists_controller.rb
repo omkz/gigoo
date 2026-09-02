@@ -15,8 +15,22 @@ module Webmcp
       end
 
       render json: shortlist_json(shortlist, freelancer_profile, created).merge(
-        turbo_stream: turbo_stream_updates(job, freelancer_profile)
+        turbo_stream: turbo_stream_updates(job, freelancer_profile, shortlisted: true)
       ), status: created ? :created : :ok
+    end
+
+    def destroy
+      job = Job.find(id_parameter(:job_id))
+      freelancer_profile = FreelancerProfile.includes(:user).find(id_parameter(:freelancer_id))
+      shortlist = job.shortlists.find_by(client: Current.user, freelancer: freelancer_profile.user)
+      authorize shortlist || job.shortlists.new(client: Current.user, freelancer: freelancer_profile.user), :destroy?
+
+      removed = shortlist.present?
+      shortlist&.destroy!
+
+      render json: removal_json(job, freelancer_profile, removed).merge(
+        turbo_stream: turbo_stream_updates(job, freelancer_profile, shortlisted: false)
+      )
     end
 
     private
@@ -54,12 +68,32 @@ module Webmcp
       }
     end
 
-    def turbo_stream_updates(job, freelancer_profile)
+    def removal_json(job, freelancer_profile, removed)
+      {
+        result: removed ? "removed" : "already_removed",
+        message: removed ? "Freelancer removed from the shortlist." : "Freelancer was already absent from this shortlist.",
+        job: {
+          id: job.id,
+          title: job.title,
+          status: job.status,
+          shortlist_url: client_job_shortlists_path(job)
+        },
+        freelancer: {
+          profile_id: freelancer_profile.id,
+          name: freelancer_profile.user.name,
+          title: freelancer_profile.title,
+          url: freelancer_path(freelancer_profile)
+        },
+        shortlist_count: job.shortlists.count
+      }
+    end
+
+    def turbo_stream_updates(job, freelancer_profile, shortlisted:)
       [
         turbo_stream.replace(
           "shortlist_action_job_#{job.id}_freelancer_#{freelancer_profile.id}",
           partial: "freelancers/shortlist_action",
-          locals: { job: job, freelancer_profile: freelancer_profile, shortlisted: true }
+          locals: { job: job, freelancer_profile: freelancer_profile, shortlisted: shortlisted }
         ),
         turbo_stream.replace(
           "job_#{job.id}_shortlist_link",

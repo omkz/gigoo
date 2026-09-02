@@ -136,4 +136,121 @@ RSpec.describe "WebMCP shortlists", type: :request do
       expect(response).to have_http_status(:forbidden)
     end
   end
+
+  describe "DELETE /webmcp/shortlists" do
+    it "requires authentication with a JSON error" do
+      delete webmcp_shortlists_path, params: { job_id: create(:job).id, freelancer_id: create(:freelancer_profile).id }
+
+      expect(response).to have_http_status(:unauthorized)
+      expect(response.parsed_body).to eq("error" => "Authentication required")
+    end
+
+    it "removes a freelancer from an owning client's shortlist" do
+      job = create(:job, title: "Rails marketplace")
+      profile = create(:freelancer_profile, title: "Senior Rails Developer")
+      shortlist = create(:shortlist, job: job, client: job.client, freelancer: profile.user)
+      create(:shortlist, job: job, client: job.client)
+      sign_in(job.client)
+
+      expect do
+        delete webmcp_shortlists_path, params: { job_id: job.id, freelancer_id: profile.id }, as: :json
+      end.to change(Shortlist, :count).by(-1)
+
+      expect(response).to have_http_status(:ok)
+      payload = response.parsed_body
+      expect(payload).to include(
+        "result" => "removed",
+        "message" => "Freelancer removed from the shortlist.",
+        "job" => {
+          "id" => job.id,
+          "title" => "Rails marketplace",
+          "status" => "open",
+          "shortlist_url" => client_job_shortlists_path(job)
+        },
+        "freelancer" => {
+          "profile_id" => profile.id,
+          "name" => profile.user.name,
+          "title" => "Senior Rails Developer",
+          "url" => freelancer_path(profile)
+        },
+        "shortlist_count" => 1
+      )
+      expect(Shortlist.exists?(shortlist.id)).to be(false)
+      expect(payload.fetch("turbo_stream")).to include(
+        %(target="shortlist_action_job_#{job.id}_freelancer_#{profile.id}"),
+        %(target="job_#{job.id}_shortlist_link"),
+        client_job_shortlists_path(job),
+        "Add",
+        "Shortlist (1)"
+      )
+    end
+
+    it "returns success when the freelancer is already absent" do
+      job = create(:job)
+      profile = create(:freelancer_profile)
+      sign_in(job.client)
+
+      expect do
+        delete webmcp_shortlists_path, params: { job_id: job.id, freelancer_id: profile.id }, as: :json
+      end.not_to change(Shortlist, :count)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body).to include(
+        "result" => "already_removed",
+        "message" => "Freelancer was already absent from this shortlist.",
+        "shortlist_count" => 0
+      )
+    end
+
+    it "forbids another client from removing an entry" do
+      shortlist = create(:shortlist)
+      profile = shortlist.freelancer.freelancer_profile
+      sign_in(create(:client_profile).user)
+
+      expect do
+        delete webmcp_shortlists_path,
+          params: { job_id: shortlist.job_id, freelancer_id: profile.id },
+          as: :json
+      end.not_to change(Shortlist, :count)
+
+      expect(response).to have_http_status(:forbidden)
+      expect(response.parsed_body).to eq("error" => "You are not authorized to perform this action")
+    end
+
+    it "returns a validation error for malformed identifiers" do
+      job = create(:job)
+      sign_in(job.client)
+
+      delete webmcp_shortlists_path, params: { job_id: 0, freelancer_id: "not-an-id" }, as: :json
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.parsed_body).to eq("error" => "job_id must be a positive integer")
+    end
+
+    it "treats unknown jobs and freelancers as not found" do
+      job = create(:job)
+      sign_in(job.client)
+
+      delete webmcp_shortlists_path, params: { job_id: 999_999, freelancer_id: create(:freelancer_profile).id }, as: :json
+      expect(response).to have_http_status(:not_found)
+      expect(response.parsed_body).to eq("error" => "Resource not found")
+
+      delete webmcp_shortlists_path, params: { job_id: job.id, freelancer_id: 999_999 }, as: :json
+      expect(response).to have_http_status(:not_found)
+      expect(response.parsed_body).to eq("error" => "Resource not found")
+    end
+
+    it "treats an impossible self-shortlist as already removed" do
+      job = create(:job)
+      profile = create(:freelancer_profile, user: job.client)
+      sign_in(job.client)
+
+      expect do
+        delete webmcp_shortlists_path, params: { job_id: job.id, freelancer_id: profile.id }, as: :json
+      end.not_to change(Shortlist, :count)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body).to include("result" => "already_removed", "shortlist_count" => 0)
+    end
+  end
 end

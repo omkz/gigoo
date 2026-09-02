@@ -29,8 +29,8 @@ if (document.modelContext && !window.__gigooWebMcpRegistrationAttempted) {
     return query ? `${path}?${query}` : path
   }
 
-  const postJson = (url, body) => fetchJson(url, {
-    method: "POST",
+  const mutateJson = (method, body) => fetchJson("/webmcp/shortlists", {
+    method: method,
     headers: {
       "Content-Type": "application/json",
       "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]')?.content
@@ -38,13 +38,16 @@ if (document.modelContext && !window.__gigooWebMcpRegistrationAttempted) {
     body: JSON.stringify(body)
   })
 
-  const addToShortlist = async (input) => {
-    const response = await postJson("/webmcp/shortlists", input)
+  const updateShortlist = async (method, input) => {
+    const response = await mutateJson(method, input)
     const { turbo_stream: turboStream, ...result } = response
 
     if (turboStream) Turbo.renderStreamMessage(turboStream)
     return result
   }
+
+  const addToShortlist = (input) => updateShortlist("POST", input)
+  const removeFromShortlist = (input) => updateShortlist("DELETE", input)
 
   try {
     document.modelContext.registerTool({
@@ -145,6 +148,26 @@ if (document.modelContext && !window.__gigooWebMcpRegistrationAttempted) {
         idempotentHint: true
       },
       execute: addToShortlist
+    })
+
+    document.modelContext.registerTool({
+      name: "remove_from_shortlist",
+      description: "Remove a freelancer from the authenticated client's shortlist for one of their Gigoo jobs.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          job_id: { type: "integer", minimum: 1, description: "Gigoo job ID owned by the authenticated client." },
+          freelancer_id: { type: "integer", minimum: 1, description: "Gigoo freelancer profile ID." }
+        },
+        required: ["job_id", "freelancer_id"],
+        additionalProperties: false
+      },
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: true,
+        idempotentHint: true
+      },
+      execute: removeFromShortlist
     })
 
     window.__gigooWebMcpRegistered = true

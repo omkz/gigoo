@@ -37,6 +37,7 @@ Rails.application.routes.draw do
     resources :freelancers, only: %i[ index show ]
     resources :clients, only: :show
     resources :shortlists, only: :create
+    delete "shortlists", to: "shortlists#destroy"
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
