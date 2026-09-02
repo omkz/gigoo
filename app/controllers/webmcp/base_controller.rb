@@ -16,6 +16,10 @@ module Webmcp
       render json: { error: "You are not authorized to perform this action" }, status: :forbidden
     end
 
+    rescue_from ActionController::InvalidAuthenticityToken do
+      render json: { error: "Invalid or missing CSRF token" }, status: :unprocessable_content
+    end
+
     private
 
     def result_limit

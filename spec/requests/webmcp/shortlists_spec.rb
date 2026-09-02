@@ -17,6 +17,24 @@ RSpec.describe "WebMCP shortlists", type: :request do
       expect(response.parsed_body).to eq("error" => "Authentication required")
     end
 
+    it "returns a JSON error instead of an HTML page when the CSRF token is missing or invalid" do
+      begin
+        original = ActionController::Base.allow_forgery_protection
+        ActionController::Base.allow_forgery_protection = true
+
+        job = create(:job, status: :open)
+        profile = create(:freelancer_profile)
+        sign_in(job.client)
+
+        post webmcp_shortlists_path, params: { job_id: job.id, freelancer_id: profile.id }, as: :json
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.parsed_body).to eq("error" => "Invalid or missing CSRF token")
+      ensure
+        ActionController::Base.allow_forgery_protection = original
+      end
+    end
+
     it "adds a freelancer to an owning client's open job shortlist" do
       job = create(:job, title: "Rails marketplace", status: :open)
       profile = create(:freelancer_profile, title: "Senior Rails Developer")
