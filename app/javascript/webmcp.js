@@ -1,9 +1,12 @@
+import { Turbo } from "@hotwired/turbo-rails"
+
 if (document.modelContext && !window.__gigooWebMcpRegistrationAttempted) {
   window.__gigooWebMcpRegistrationAttempted = true
 
-  const fetchJson = async (url) => {
+  const fetchJson = async (url, options = {}) => {
     const response = await fetch(url, {
-      headers: { Accept: "application/json" },
+      ...options,
+      headers: { Accept: "application/json", ...options.headers },
       credentials: "same-origin"
     })
 
@@ -24,6 +27,22 @@ if (document.modelContext && !window.__gigooWebMcpRegistrationAttempted) {
 
     const query = parameters.toString()
     return query ? `${path}?${query}` : path
+  }
+
+  const postJson = (url, body) => fetchJson(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]')?.content
+    },
+    body: JSON.stringify(body)
+  })
+
+  const addToShortlist = async (input) => {
+    const result = await postJson("/webmcp/shortlists", input)
+
+    setTimeout(() => Turbo.visit(window.location.href, { action: "replace" }), 0)
+    return result
   }
 
   try {
@@ -105,6 +124,26 @@ if (document.modelContext && !window.__gigooWebMcpRegistrationAttempted) {
       },
       annotations: { readOnlyHint: true },
       execute: ({ client_id }) => fetchJson(`/webmcp/clients/${encodeURIComponent(client_id)}`)
+    })
+
+    document.modelContext.registerTool({
+      name: "add_to_shortlist",
+      description: "Add a freelancer to the authenticated client's shortlist for one of their open Gigoo jobs.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          job_id: { type: "integer", minimum: 1, description: "Gigoo job ID owned by the authenticated client." },
+          freelancer_id: { type: "integer", minimum: 1, description: "Gigoo freelancer profile ID." }
+        },
+        required: ["job_id", "freelancer_id"],
+        additionalProperties: false
+      },
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: true
+      },
+      execute: addToShortlist
     })
 
     window.__gigooWebMcpRegistered = true

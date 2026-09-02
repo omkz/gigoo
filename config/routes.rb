@@ -36,6 +36,7 @@ Rails.application.routes.draw do
     resources :jobs, only: %i[ index show ]
     resources :freelancers, only: %i[ index show ]
     resources :clients, only: :show
+    resources :shortlists, only: :create
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

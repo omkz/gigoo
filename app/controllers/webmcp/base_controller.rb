@@ -12,6 +12,10 @@ module Webmcp
       render json: { error: error.message }, status: :unprocessable_content
     end
 
+    rescue_from Pundit::NotAuthorizedError do
+      render json: { error: "You are not authorized to perform this action" }, status: :forbidden
+    end
+
     private
 
     def result_limit
@@ -21,6 +25,17 @@ module Webmcp
       raise InvalidParameter, "limit must be an integer between 1 and 20" unless limit&.between?(1, 20)
 
       limit
+    end
+
+    def require_webmcp_authentication
+      render json: { error: "Authentication required" }, status: :unauthorized unless authenticated?
+    end
+
+    def id_parameter(name)
+      value = Integer(params[name], exception: false)
+      raise InvalidParameter, "#{name} must be a positive integer" unless value&.positive?
+
+      value
     end
 
     def usd_cents_parameter(name)
