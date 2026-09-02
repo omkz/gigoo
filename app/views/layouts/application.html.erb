@@ -31,6 +31,9 @@
           <%= link_to "Browse jobs", jobs_path, class: "text-slate-600 hover:text-indigo-600" %>
           <%= link_to "Find freelancers", freelancers_path, class: "text-slate-600 hover:text-indigo-600" %>
           <% if authenticated? %>
+            <% if Current.user.freelancer_profile.present? %>
+              <%= link_to "My work", freelancer_work_path, class: "text-slate-600 hover:text-indigo-600" %>
+            <% end %>
             <% if Current.user.client_profile.present? %>
               <%= link_to "My jobs", client_jobs_path, class: "text-slate-600 hover:text-indigo-600" %>
             <% end %>
