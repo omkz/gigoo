@@ -39,9 +39,10 @@ if (document.modelContext && !window.__gigooWebMcpRegistrationAttempted) {
   })
 
   const addToShortlist = async (input) => {
-    const result = await postJson("/webmcp/shortlists", input)
+    const response = await postJson("/webmcp/shortlists", input)
+    const { turbo_stream: turboStream, ...result } = response
 
-    setTimeout(() => Turbo.visit(window.location.href, { action: "replace" }), 0)
+    if (turboStream) Turbo.renderStreamMessage(turboStream)
     return result
   }
 

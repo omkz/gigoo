@@ -64,6 +64,7 @@ RSpec.describe "Freelancers", type: :request do
     get freelancer_path(profile)
 
     expect(response.body).to include(own_job.title, client_job_shortlists_path(own_job))
+    expect(response.body).to include("shortlist_action_job_#{own_job.id}_freelancer_#{profile.id}")
     expect(response.body).not_to include(other_job.title)
   end
 

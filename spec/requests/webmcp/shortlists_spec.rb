@@ -51,6 +51,12 @@ RSpec.describe "WebMCP shortlists", type: :request do
       )
       expect(shortlist.client).to eq(job.client)
       expect(shortlist.freelancer).to eq(profile.user)
+      expect(payload.fetch("turbo_stream")).to include(
+        %(target="shortlist_action_job_#{job.id}_freelancer_#{profile.id}"),
+        %(target="job_#{job.id}_shortlist_link"),
+        "Shortlisted",
+        "Shortlist (1)"
+      )
     end
 
     it "returns the existing entry when the freelancer is already shortlisted" do

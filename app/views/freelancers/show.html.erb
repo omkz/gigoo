@@ -91,11 +91,10 @@
                     <p class="font-semibold"><%= job.title %></p>
                     <p class="mt-1 text-xs font-semibold uppercase tracking-wide text-slate-500"><%= job.status %></p>
                   </div>
-                  <% if @shortlisted_job_ids.include?(job.id) %>
-                    <span class="text-sm font-semibold text-emerald-700">Shortlisted</span>
-                  <% else %>
-                    <%= button_to "Add", client_job_shortlists_path(job), params: { freelancer_profile_id: @freelancer.id }, class: "rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500" %>
-                  <% end %>
+                  <%= render "shortlist_action",
+                    job: job,
+                    freelancer_profile: @freelancer,
+                    shortlisted: @shortlisted_job_ids.include?(job.id) %>
                 </div>
               </div>
             <% end %>

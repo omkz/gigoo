@@ -1,0 +1,7 @@
+<div id="shortlist_action_job_<%= job.id %>_freelancer_<%= freelancer_profile.id %>">
+  <% if shortlisted %>
+    <span class="text-sm font-semibold text-emerald-700">Shortlisted</span>
+  <% else %>
+    <%= button_to "Add", client_job_shortlists_path(job), params: { freelancer_profile_id: freelancer_profile.id }, class: "rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500" %>
+  <% end %>
+</div>

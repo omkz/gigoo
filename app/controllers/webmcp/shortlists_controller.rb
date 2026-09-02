@@ -14,7 +14,9 @@ module Webmcp
         return render json: { error: shortlist.errors.full_messages.to_sentence }, status: :unprocessable_content
       end
 
-      render json: shortlist_json(shortlist, freelancer_profile, created), status: created ? :created : :ok
+      render json: shortlist_json(shortlist, freelancer_profile, created).merge(
+        turbo_stream: turbo_stream_updates(job, freelancer_profile)
+      ), status: created ? :created : :ok
     end
 
     private
@@ -50,6 +52,21 @@ module Webmcp
           }
         }
       }
+    end
+
+    def turbo_stream_updates(job, freelancer_profile)
+      [
+        turbo_stream.replace(
+          "shortlist_action_job_#{job.id}_freelancer_#{freelancer_profile.id}",
+          partial: "freelancers/shortlist_action",
+          locals: { job: job, freelancer_profile: freelancer_profile, shortlisted: true }
+        ),
+        turbo_stream.replace(
+          "job_#{job.id}_shortlist_link",
+          partial: "client/jobs/shortlist_link",
+          locals: { job: job, shortlist_count: job.shortlists.count }
+        )
+      ].join
     end
   end
 end

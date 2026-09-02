@@ -61,6 +61,7 @@ RSpec.describe "Client jobs", type: :request do
 
     expect(response.body).to include(client_job_shortlists_path(shortlisted_job), "Shortlist (2)")
     expect(response.body).to include(client_job_shortlists_path(empty_job), "Shortlist (0)")
+    expect(response.body).to include("job_#{shortlisted_job.id}_shortlist_link", "job_#{empty_job.id}_shortlist_link")
   end
 
   it "allows a client-profile user to create a draft job" do
