@@ -54,8 +54,12 @@ RSpec.describe "WebMCP shortlists", type: :request do
       expect(payload.fetch("turbo_stream")).to include(
         %(target="shortlist_action_job_#{job.id}_freelancer_#{profile.id}"),
         %(target="job_#{job.id}_shortlist_link"),
+        %(target="job_#{job.id}_shortlist_contents"),
         "Shortlisted",
-        "Shortlist (1)"
+        "Shortlist (1)",
+        profile.user.name,
+        "Senior Rails Developer",
+        "No reviews yet"
       )
     end
 
@@ -149,7 +153,8 @@ RSpec.describe "WebMCP shortlists", type: :request do
       job = create(:job, title: "Rails marketplace")
       profile = create(:freelancer_profile, title: "Senior Rails Developer")
       shortlist = create(:shortlist, job: job, client: job.client, freelancer: profile.user)
-      create(:shortlist, job: job, client: job.client)
+      remaining_profile = create(:freelancer_profile, title: "Remaining candidate")
+      create(:shortlist, job: job, client: job.client, freelancer: remaining_profile.user)
       sign_in(job.client)
 
       expect do
@@ -179,10 +184,34 @@ RSpec.describe "WebMCP shortlists", type: :request do
       expect(payload.fetch("turbo_stream")).to include(
         %(target="shortlist_action_job_#{job.id}_freelancer_#{profile.id}"),
         %(target="job_#{job.id}_shortlist_link"),
+        %(target="job_#{job.id}_shortlist_contents"),
         client_job_shortlists_path(job),
         "Add",
-        "Shortlist (1)"
+        "Shortlist (1)",
+        remaining_profile.user.name,
+        "Remaining candidate"
       )
+      expect(payload.fetch("turbo_stream")).not_to include(profile.user.name, "Senior Rails Developer")
+    end
+
+    it "replaces the final shortlist entry with the empty state" do
+      shortlist = create(:shortlist)
+      profile = shortlist.freelancer.freelancer_profile
+      sign_in(shortlist.client)
+
+      delete webmcp_shortlists_path,
+        params: { job_id: shortlist.job_id, freelancer_id: profile.id },
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+      turbo_stream = response.parsed_body.fetch("turbo_stream")
+      expect(turbo_stream).to include(
+        %(target="job_#{shortlist.job_id}_shortlist_contents"),
+        %(id="job_#{shortlist.job_id}_shortlist_contents"),
+        "No shortlisted freelancers yet.",
+        "Shortlist (0)"
+      )
+      expect(turbo_stream).not_to include(profile.user.name, profile.title)
     end
 
     it "returns success when the freelancer is already absent" do

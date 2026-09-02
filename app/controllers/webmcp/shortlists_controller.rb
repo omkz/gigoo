@@ -89,6 +89,9 @@ module Webmcp
     end
 
     def turbo_stream_updates(job, freelancer_profile, shortlisted:)
+      shortlists = job.shortlists.includes(freelancer: :freelancer_profile).order(created_at: :desc)
+      trust_evidence = FreelancerProfile.trust_evidence_for(shortlists.map(&:freelancer_id))
+
       [
         turbo_stream.replace(
           "shortlist_action_job_#{job.id}_freelancer_#{freelancer_profile.id}",
@@ -99,6 +102,11 @@ module Webmcp
           "job_#{job.id}_shortlist_link",
           partial: "client/jobs/shortlist_link",
           locals: { job: job, shortlist_count: job.shortlists.count }
+        ),
+        turbo_stream.replace(
+          "job_#{job.id}_shortlist_contents",
+          partial: "client/shortlists/contents",
+          locals: { job: job, shortlists: shortlists, trust_evidence: trust_evidence }
         )
       ].join
     end

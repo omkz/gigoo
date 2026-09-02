@@ -135,7 +135,20 @@ RSpec.describe "Client shortlists", type: :request do
     expect(response.body).to include(profile.user.name, profile.title, profile.location, profile.skills.first, "$250.00/hr")
     expect(response.body).not_to include(profile.user.email_address)
     expect(response.body).to include(freelancer_path(profile))
+    expect(response.body).to include(%(id="job_#{selected_job.id}_shortlist_contents"))
     expect(response.body).not_to include(hidden_profile.title)
+  end
+
+  it "renders the empty state inside the stable shortlist contents target" do
+    job = create(:job)
+    sign_in(job.client)
+
+    get client_job_shortlists_path(job)
+
+    expect(response.body).to include(
+      %(id="job_#{job.id}_shortlist_contents"),
+      "No shortlisted freelancers yet."
+    )
   end
 
   it "orders shortlist entries newest first" do
