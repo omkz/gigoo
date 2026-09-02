@@ -29,7 +29,7 @@ if (document.modelContext && !window.__gigooWebMcpRegistrationAttempted) {
     return query ? `${path}?${query}` : path
   }
 
-  const mutateJson = (method, body) => fetchJson("/webmcp/shortlists", {
+  const mutateJson = (url, method, body) => fetchJson(url, {
     method: method,
     headers: {
       "Content-Type": "application/json",
@@ -38,16 +38,17 @@ if (document.modelContext && !window.__gigooWebMcpRegistrationAttempted) {
     body: JSON.stringify(body)
   })
 
-  const updateShortlist = async (method, input) => {
-    const response = await mutateJson(method, input)
+  const updatePageFromMutation = async (url, method, input) => {
+    const response = await mutateJson(url, method, input)
     const { turbo_stream: turboStream, ...result } = response
 
     if (turboStream) Turbo.renderStreamMessage(turboStream)
     return result
   }
 
-  const addToShortlist = (input) => updateShortlist("POST", input)
-  const removeFromShortlist = (input) => updateShortlist("DELETE", input)
+  const addToShortlist = (input) => updatePageFromMutation("/webmcp/shortlists", "POST", input)
+  const removeFromShortlist = (input) => updatePageFromMutation("/webmcp/shortlists", "DELETE", input)
+  const createProposalDraft = (input) => updatePageFromMutation("/webmcp/proposals", "POST", input)
 
   try {
     document.modelContext.registerTool({
@@ -168,6 +169,27 @@ if (document.modelContext && !window.__gigooWebMcpRegistrationAttempted) {
         idempotentHint: true
       },
       execute: removeFromShortlist
+    })
+
+    document.modelContext.registerTool({
+      name: "create_proposal_draft",
+      description: "Create an unsent proposal draft for an open Gigoo job as the authenticated freelancer.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          job_id: { type: "integer", minimum: 1, description: "Open Gigoo job ID." },
+          cover_letter: { type: "string", minLength: 1, description: "Cover letter saved in the proposal draft." },
+          proposed_amount_usd: { type: "number", exclusiveMinimum: 0, description: "Proposed amount in US dollars." }
+        },
+        required: ["job_id", "cover_letter", "proposed_amount_usd"],
+        additionalProperties: false
+      },
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: true
+      },
+      execute: createProposalDraft
     })
 
     window.__gigooWebMcpRegistered = true

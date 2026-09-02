@@ -95,4 +95,15 @@ RSpec.describe "Public jobs", type: :request do
     expect(response.body).to include("Proposal submitted · Pending")
     expect(response.body).not_to include("proposal[amount]")
   end
+
+  it "shows a saved draft as unsubmitted with a review link" do
+    proposal = create(:proposal, status: :draft)
+    sign_in(proposal.freelancer)
+
+    get job_path(proposal.job)
+
+    expect(response.body).to include("Proposal draft saved · Not submitted", "Review and edit draft")
+    expect(response.body).to include(edit_freelancer_proposal_path(proposal))
+    expect(response.body).not_to include("Proposal submitted · Draft")
+  end
 end

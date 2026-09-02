@@ -6,8 +6,14 @@ RSpec.describe Proposal, type: :model do
       "pending" => 0,
       "accepted" => 1,
       "rejected" => 2,
-      "withdrawn" => 3
+      "withdrawn" => 3,
+      "draft" => 4
     )
+  end
+
+  it "supports an unsent draft without changing the default submitted status" do
+    expect(build(:proposal, status: :draft)).to be_draft
+    expect(build(:proposal)).to be_pending
   end
 
   it "allows only one proposal from a freelancer per job" do

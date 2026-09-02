@@ -54,4 +54,23 @@ RSpec.describe ProposalPolicy do
       expect(described_class.new(contracted.job.client, contracted)).not_to be_accept
     end
   end
+
+  describe "editing a draft" do
+    it "allows only the owning freelancer to edit an open-job draft" do
+      proposal = create(:proposal, status: :draft)
+
+      expect(described_class.new(proposal.freelancer, proposal)).to be_edit
+      expect(described_class.new(proposal.freelancer, proposal)).to be_update
+      expect(described_class.new(create(:freelancer_profile).user, proposal)).not_to be_update
+    end
+
+    it "rejects submitted proposals and drafts whose jobs are no longer open" do
+      submitted = create(:proposal, status: :pending)
+      closed_draft = create(:proposal, status: :draft)
+      closed_draft.job.update!(status: :closed)
+
+      expect(described_class.new(submitted.freelancer, submitted)).not_to be_update
+      expect(described_class.new(closed_draft.freelancer, closed_draft)).not_to be_update
+    end
+  end
 end

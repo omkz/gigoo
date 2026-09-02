@@ -14,4 +14,15 @@ class ProposalPolicy < ApplicationPolicy
       record.pending? &&
       record.job.contract.blank?
   end
+
+  def edit?
+    update?
+  end
+
+  def update?
+    user.present? &&
+      record.freelancer == user &&
+      record.draft? &&
+      record.job.open?
+  end
 end

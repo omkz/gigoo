@@ -5,7 +5,7 @@ module Client
     def index
       @job = Job.includes(:contract).find(params[:job_id])
       authorize @job, :proposals?
-      @proposals = @job.proposals.includes(freelancer: :freelancer_profile).order(created_at: :desc)
+      @proposals = @job.proposals.where.not(status: :draft).includes(freelancer: :freelancer_profile).order(created_at: :desc)
     end
 
     def accept

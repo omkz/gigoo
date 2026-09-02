@@ -2,7 +2,7 @@ class Proposal < ApplicationRecord
   belongs_to :job
   belongs_to :freelancer, class_name: "User"
 
-  enum :status, { pending: 0, accepted: 1, rejected: 2, withdrawn: 3 }
+  enum :status, { pending: 0, accepted: 1, rejected: 2, withdrawn: 3, draft: 4 }
 
   validates :amount_cents,
     presence: true,

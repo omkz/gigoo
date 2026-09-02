@@ -23,6 +23,7 @@ Rails.application.routes.draw do
   end
   namespace :freelancer do
     resources :contracts, only: :show
+    resources :proposals, only: %i[ edit update ]
   end
   resources :contracts, only: [] do
     resources :reviews, only: :create
@@ -36,6 +37,7 @@ Rails.application.routes.draw do
     resources :jobs, only: %i[ index show ]
     resources :freelancers, only: %i[ index show ]
     resources :clients, only: :show
+    resources :proposals, only: :create
     resources :shortlists, only: :create
     delete "shortlists", to: "shortlists#destroy"
   end

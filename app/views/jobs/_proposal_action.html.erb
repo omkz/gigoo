@@ -1,0 +1,19 @@
+<div id="job_<%= job.id %>_proposal_action">
+  <h2 class="text-xl font-semibold">Submit a proposal</h2>
+
+  <% if Current.user.nil? %>
+    <p class="mt-3 text-slate-600">Sign in to apply for this job.</p>
+    <%= link_to "Sign in to submit", new_session_path, class: "mt-5 inline-flex rounded-lg bg-indigo-600 px-4 py-2.5 font-semibold text-white hover:bg-indigo-500" %>
+  <% elsif Current.user.freelancer_profile.blank? %>
+    <p class="mt-3 text-slate-600">Create a freelancer profile to submit a proposal.</p>
+  <% elsif job.client == Current.user %>
+    <p class="mt-3 text-slate-600">You cannot submit a proposal to your own job.</p>
+  <% elsif existing_proposal&.draft? %>
+    <p class="mt-3 rounded-lg bg-amber-50 px-4 py-3 font-medium text-amber-800">Proposal draft saved · Not submitted</p>
+    <%= link_to "Review and edit draft", edit_freelancer_proposal_path(existing_proposal), class: "mt-5 inline-flex font-semibold text-indigo-600 hover:text-indigo-500" %>
+  <% elsif existing_proposal %>
+    <p class="mt-3 rounded-lg bg-emerald-50 px-4 py-3 font-medium text-emerald-800">Proposal submitted · <%= existing_proposal.status.humanize %></p>
+  <% else %>
+    <%= render "proposals/form", job: job, proposal: proposal %>
+  <% end %>
+</div>

@@ -55,6 +55,16 @@ RSpec.describe "Client proposals", type: :request do
     expect(response.body).to include("No proposals yet.")
   end
 
+  it "does not expose freelancer drafts to the client" do
+    draft = create(:proposal, status: :draft, message: "Private unfinished cover letter")
+    sign_in(draft.job.client)
+
+    get client_job_proposals_path(draft.job)
+
+    expect(response.body).to include("No proposals yet.")
+    expect(response.body).not_to include(draft.message, draft.freelancer.name)
+  end
+
   it "does not allow an owner without a client profile to access proposals" do
     job = create(:job)
     job.client.client_profile.destroy!
