@@ -17,6 +17,7 @@ RSpec.describe "Freelancer proposal drafts", type: :request do
 
     expect(response).to have_http_status(:ok)
     expect(response.body).to include("Draft · Not submitted", "Initial draft", "Save draft", "Submit proposal")
+    expect(response.body).to include(%(href="#{job_path(proposal.job)}">#{proposal.job.title}</a>))
 
     patch freelancer_proposal_path(proposal), params: {
       proposal: { amount: "1500.75", message: "Updated draft", status: :pending }
