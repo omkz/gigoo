@@ -178,6 +178,15 @@ ApplicationRecord.transaction do
     budget_usd: 4_000, skills: [ "Ruby", "Rails", "PostgreSQL", "Hotwire", "RSpec" ], status: :open
   )
 
+  # This job must always come back to a clean slate so `bin/rails db:seed` is
+  # safe to rerun against a live/demoed deployment. Only THIS job's contract,
+  # proposals, and shortlist entries are cleared -- nothing else in the
+  # marketplace is touched.
+  jobs[:live_demo].contract&.destroy!
+  jobs[:live_demo].proposals.destroy_all
+  jobs[:live_demo].shortlists.destroy_all
+  jobs[:live_demo].update!(status: :open)
+
   # -- Other open jobs (kept open all the way through the seed) --------------
   jobs[:rails8_upgrade] = find_or_create_job(
     client: users[:james], title: "Upgrade Rails Application to Rails 8",

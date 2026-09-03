@@ -84,21 +84,26 @@ test:
 # Read https://guides.rubyonrails.org/configuring.html#configuring-a-database
 # for a full overview on how database connection configuration can be specified.
 #
+
+# Hackathon/Render deployment: a single PostgreSQL database supplied by
+# Render's DATABASE_URL. `cache`/`queue`/`cable` are kept as roles (rather
+# than removed) because the solid_cache/solid_queue/solid_cable gems are
+# still bundled and their models call `connects_to` for those roles at
+# eager-load time regardless of which adapters are actually active -- see
+# config/environments/production.rb, where the cache store, Active Job
+# adapter, and Action Cable adapter are all switched to in-process/async, so
+# none of these roles are ever written to. All four roles point at the same
+# single database -- there is no separate cache/queue/cable database.
 production:
   primary: &primary_production
     <<: *default
-    database: gigoo_production
-    username: gigoo
-    password: <%= ENV["GIGOO_DATABASE_PASSWORD"] %>
+    url: <%= ENV["DATABASE_URL"] %>
   cache:
     <<: *primary_production
-    database: gigoo_production_cache
-    migrations_paths: db/cache_migrate
+    database_tasks: false
   queue:
     <<: *primary_production
-    database: gigoo_production_queue
-    migrations_paths: db/queue_migrate
+    database_tasks: false
   cable:
     <<: *primary_production
-    database: gigoo_production_cable
-    migrations_paths: db/cable_migrate
+    database_tasks: false
