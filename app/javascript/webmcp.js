@@ -53,7 +53,12 @@ if (document.modelContext && !window.__gigooWebMcpRegistrationAttempted) {
     return result
   }
 
-  const removeFromShortlist = (input) => updatePageFromMutation("/webmcp/shortlists", "DELETE", input)
+  const removeFromShortlist = async (input) => {
+    const result = await updatePageFromMutation("/webmcp/shortlists", "DELETE", input)
+    const shortlistUrl = result.job?.shortlist_url
+    if (shortlistUrl) Turbo.visit(shortlistUrl)
+    return result
+  }
   const createProposalDraft = (input) => updatePageFromMutation("/webmcp/proposals", "POST", input)
 
   try {
