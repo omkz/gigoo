@@ -94,7 +94,10 @@ RSpec.describe "WebMCP shortlists", type: :request do
       expect(response.parsed_body).to include(
         "result" => "already_shortlisted",
         "message" => "Freelancer was already on this shortlist.",
-        "shortlist" => include("id" => shortlist.id)
+        "shortlist" => include(
+          "id" => shortlist.id,
+          "job" => include("shortlist_url" => client_job_shortlists_path(shortlist.job))
+        )
       )
     end
 
